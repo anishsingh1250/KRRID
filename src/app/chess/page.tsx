@@ -1,3 +1,4 @@
+// This file will be moved to src/app/learn/page.tsx for the protected Learn page.
 "use client";
 import { useState } from "react";
 import dynamic from "next/dynamic";
@@ -5,11 +6,41 @@ import ChessPuzzle from "@/components/ChessPuzzle";
 import ChessGameReplay from "@/components/ChessGameReplay";
 import MasterGames from "@/components/MasterGames";
 import { FaChessBoard, FaPuzzlePiece, FaHistory, FaGraduationCap, FaUsers } from "react-icons/fa";
-import DndProviderWrapper from "@/components/DndProviderWrapper";
 import { useRouter } from "next/navigation";
 
 // Dynamically import ChessboardUI to avoid SSR issues
 const Chessboard = dynamic(() => import("@/components/ChessboardUI"), { ssr: false });
+
+// Sample/mock data for course tree and lessons
+const sampleCourse = {
+  title: "Chess Fundamentals",
+  sections: [
+    {
+      title: "Introduction",
+      lessons: [
+        {
+          title: "Welcome to Chess",
+          content: "Chess is a game of strategy and skill. In this lesson, you'll learn the basics of the game, the board, and the pieces.",
+          imageUrl: "https://placehold.co/400x200?text=Chess+Intro",
+          videoUrl: "https://www.youtube.com/embed/NAIQyoPcjNM",
+          fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        }
+      ]
+    },
+    {
+      title: "Basic Moves",
+      lessons: [
+        {
+          title: "How Pieces Move",
+          content: "Each chess piece moves differently. Let's explore how each one works!",
+          imageUrl: "https://placehold.co/400x200?text=Piece+Movement",
+          videoUrl: "https://www.youtube.com/embed/NAIQyoPcjNM",
+          fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        }
+      ]
+    }
+  ]
+};
 
 export default function ChessPage() {
   const [tab, setTab] = useState<"play" | "puzzle" | "replay" | "study">("play");

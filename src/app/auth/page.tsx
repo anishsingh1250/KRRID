@@ -23,15 +23,33 @@ export default function AuthPage() {
   useEffect(() => {
     // Listen for auth state changes
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session && asPlayer) {
-        router.push("/chess/multiplayer");
+      if (event === 'SIGNED_IN') {
+        if (asPlayer) {
+          router.push("/chess/multiplayer");
+        } else {
+          const userRole = session?.user?.user_metadata?.role;
+          if (userRole && roles.includes(userRole)) {
+            router.push(`/dashboard/${userRole}`);
+          } else {
+            router.push("/dashboard");
+          }
+        }
       }
     });
 
     // Also check on mount (for reloads)
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user && asPlayer) {
-        router.push("/chess/multiplayer");
+      if (data.user) {
+        if (asPlayer) {
+          router.push("/chess/multiplayer");
+        } else {
+          const userRole = data.user.user_metadata?.role;
+          if (userRole && roles.includes(userRole)) {
+            router.push(`/dashboard/${userRole}`);
+          } else {
+            router.push("/dashboard");
+          }
+        }
       }
     });
 
@@ -44,6 +62,7 @@ export default function AuthPage() {
     e.preventDefault();
     setMessage(null);
     setLoading(true);
+
     if (mode === "signup") {
       if (password !== confirm) {
         setMessage("Passwords do not match");
@@ -66,14 +85,13 @@ export default function AuthPage() {
       } else {
         if (asPlayer) {
           router.push("/chess/multiplayer");
-      } else {
-        // Fetch user role from session
-        const user = data.user;
-        const userRole = user?.user_metadata?.role;
-        if (userRole && roles.includes(userRole)) {
-          router.push(`/dashboard/${userRole}`);
         } else {
-          router.push("/dashboard");
+          const user = data.user;
+          const userRole = user?.user_metadata?.role;
+          if (userRole && roles.includes(userRole)) {
+            router.push(`/dashboard/${userRole}`);
+          } else {
+            router.push("/dashboard");
           }
         }
       }
@@ -113,6 +131,7 @@ export default function AuthPage() {
             Sign Up
           </button>
         </div>
+
         <button
           type="button"
           className="bg-primary text-white rounded-lg px-4 py-2 font-heading text-base transition-transform duration-200 hover:scale-105 mb-2"
@@ -121,93 +140,93 @@ export default function AuthPage() {
         >
           Continue with Google
         </button>
+
         <form className="flex flex-col gap-4" onSubmit={handleAuth}>
           <input
             type="email"
-            required
             placeholder="Email"
+            required
             className="border border-gray-400 rounded-lg px-4 py-2 font-body focus:border-primary outline-none bg-white text-black"
             value={email}
             onChange={e => setEmail(e.target.value)}
           />
           <input
             type="password"
-            required
             placeholder="Password"
+            required
             className="border border-gray-400 rounded-lg px-4 py-2 font-body focus:border-primary outline-none bg-white text-black"
             value={password}
             onChange={e => setPassword(e.target.value)}
           />
           {mode === "signup" && (
-              <input
-                type="password"
-                required
-                placeholder="Confirm Password"
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              required
               className="border border-gray-400 rounded-lg px-4 py-2 font-body focus:border-primary outline-none bg-white text-black"
-                value={confirm}
-                onChange={e => setConfirm(e.target.value)}
-              />
+              value={confirm}
+              onChange={e => setConfirm(e.target.value)}
+            />
           )}
           {!asPlayer && mode === "signup" && (
-              <select
+            <select
               className="border border-gray-400 rounded-lg px-4 py-2 font-body focus:border-primary outline-none bg-white text-black"
-                value={role}
-                onChange={e => setRole(e.target.value)}
-              >
-                {roles.map(r => (
-                  <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
-                ))}
-              </select>
+              value={role}
+              onChange={e => setRole(e.target.value)}
+            >
+              {roles.map(r => (
+                <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
+              ))}
+            </select>
           )}
           <button
             type="submit"
             className="bg-primary text-white rounded-lg px-4 py-2 font-heading text-lg transition-transform duration-200 hover:scale-105 hover:bg-primary disabled:opacity-60"
             disabled={loading}
           >
-            {loading ? (mode === "signup" ? "Signing Up..." : "Logging In...") : (mode === "signup" ? "Sign Up" : "Login")}
+            {loading ? "Processing..." : (mode === "signup" ? "Sign Up" : "Login")}
           </button>
         </form>
-        {mode === "login" && (
+
+        {message && (
+          <div className="text-red-500 text-center">{message}</div>
+        )}
+
+        {!showReset ? (
           <button
-            type="button"
-            className="text-primary underline text-sm font-heading mt-2"
+            className="text-primary text-sm hover:underline"
             onClick={() => setShowReset(true)}
           >
-            Forgot password?
+            Forgot Password?
           </button>
-        )}
-        {message && <div className="text-center text-accent font-heading">{message}</div>}
-        {showReset && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl shadow-card p-6 w-full max-w-xs flex flex-col gap-4 relative">
-              <button
-                className="absolute top-2 right-2 text-black text-xl"
-                onClick={() => setShowReset(false)}
-                aria-label="Close"
-              >
-                ×
-              </button>
-              <h3 className="font-heading text-lg mb-2">Reset Password</h3>
-              <form className="flex flex-col gap-3" onSubmit={handleReset}>
-                <input
-                  type="email"
-                  required
-                  placeholder="Your email"
-                  className="border border-gray-400 rounded-lg px-4 py-2 font-body focus:border-primary outline-none bg-white text-black"
-                  value={resetEmail}
-                  onChange={e => setResetEmail(e.target.value)}
-                />
-                <button
-                  type="submit"
-                  className="bg-primary text-white rounded-lg px-4 py-2 font-heading text-base transition-transform duration-200 hover:scale-105 disabled:opacity-60"
-                  disabled={loading}
-                >
-                  {loading ? "Sending..." : "Send reset link"}
-                </button>
-              </form>
-              {resetMsg && <div className="text-center text-accent font-heading mt-2">{resetMsg}</div>}
-            </div>
-          </div>
+        ) : (
+          <form onSubmit={handleReset} className="flex flex-col gap-4">
+            <input
+              type="email"
+              placeholder="Enter your email"
+              required
+              className="border border-gray-400 rounded-lg px-4 py-2 font-body focus:border-primary outline-none bg-white text-black"
+              value={resetEmail}
+              onChange={e => setResetEmail(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="bg-primary text-white rounded-lg px-4 py-2 font-heading text-base transition-transform duration-200 hover:scale-105"
+              disabled={loading}
+            >
+              Reset Password
+            </button>
+            {resetMsg && (
+              <div className="text-red-500 text-center">{resetMsg}</div>
+            )}
+            <button
+              type="button"
+              className="text-primary text-sm hover:underline"
+              onClick={() => setShowReset(false)}
+            >
+              Back to Login
+            </button>
+          </form>
         )}
       </div>
     </div>
