@@ -13,3 +13,17 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true
   }
 });
+
+// Admin client with custom storage key
+export const supabaseAdmin = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    storageKey: 'sb-admin-auth-token',
+  }
+});
+
+  createClient(supabaseUrl, supabaseAnonKey, {
+    auth: { storageKey: 'your-custom-key' }
+  })

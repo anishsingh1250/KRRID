@@ -5,13 +5,7 @@
   --foreground: #171717;
 }
 
-/* @theme inline { */
-  /* --color-background: var(--background); */
-  /* --color-foreground: var(--foreground); */
-  /* --font-sans: var(--font-geist-sans); */
-  /* --font-mono: var(--font-geist-mono); */
-/* } */
-/*  */
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -22,5 +16,38 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* font-family: Arial, Helvetica, sans-serif; */
 }
+
+@font-face {
+  font-family: 'BeautiqueDisplayCondensed';
+  
+  src: url('/BeautiqueDisplayCondensed-Black.otf') format('opentype');
+
+  font-weight: 900;
+}
+@font-face {
+  font-family: 'BeautiqueDisplayCondensed-BlackItalic';
+  src: url('/BeautiqueDisplayCondensed-BlackItalic.otf') format('opentype');
+  font-weight: 900;
+}
+
+.krrid-heading {
+  font-family: 'BeautiqueDisplayCondensed';
+  font-weight: 900;
+  font-size: 72px;
+  color: #0a0a0a;
+
+}
+
+.bg-krrid-highlight {
+    font-weight: 900;
+  font-family: 'BeautiqueDisplayCondensed-BlackItalic';
+  background: linear-gradient(90deg, #47D4EB 0%, #ffffff 100%);
+  display: inline-block;
+  /* border-radius: 0.18em; */
+  padding: 0 0 0 0.2em;
+  margin: 0 0.2em;
+}
+
+

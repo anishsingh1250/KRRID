@@ -1,64 +1,55 @@
 'use client';
-
-import Link from 'next/link';
-import Image from 'next/image';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 
 export default function ContactPage() {
+  // State for Book Demo form
+  const [demoForm, setDemoForm] = useState({
+    firstName: '', lastName: '', email: '', phone: '', age: '', datetime: '', message: ''
+  });
+  // State for Callback form
+  const [callbackForm, setCallbackForm] = useState({
+    firstName: '', lastName: '', email: '', phone: '', datetime: '', message: ''
+  });
+  const handleDemoChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setDemoForm({ ...demoForm, [e.target.name]: e.target.value });
+  const handleCallbackChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setCallbackForm({ ...callbackForm, [e.target.name]: e.target.value });
+  const handleDemoSubmit = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); alert('Demo form submitted: ' + JSON.stringify(demoForm)); };
+  const handleCallbackSubmit = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); alert('Callback form submitted: ' + JSON.stringify(callbackForm)); };
   return (
-    <div className="min-h-screen flex flex-col bg-white font-body">
-      {/* Navbar replicating the structure from home page for consistency */}
-      <nav className="flex items-center justify-between px-6 md:px-12 py-4 sticky top-0 z-50 bg-white shadow-sm">
-        <div className="flex items-center">
-          <Link href="/">
-            <Image src="/logo-text-krrid.svg" alt="Krrid Logo" width={100} height={30} />
-          </Link>
+    <main className="min-h-screen bg-gradient-to-br from-teal-100 via-blue-50 to-blue-200 flex flex-col items-center justify-center p-8">
+      <section className="bg-white rounded-2xl shadow-xl p-10 max-w-2xl w-full mb-8">
+        <h1 className="text-5xl font-heading font-bold text-teal-800 mb-4 text-center">Book Demo Now</h1>
+        <h2 className="text-2xl font-bold text-blue-700 mb-2 text-center">Book Your Free Demo</h2>
+        <p className="text-base text-gray-700 mb-4 text-center">Fill the form below to get the available slot.</p>
+        <form className="grid gap-4 mb-8" onSubmit={handleDemoSubmit}>
+          <input className="rounded p-2 border border-blue-200" name="firstName" value={demoForm.firstName} onChange={handleDemoChange} placeholder="First name*" required />
+          <input className="rounded p-2 border border-blue-200" name="lastName" value={demoForm.lastName} onChange={handleDemoChange} placeholder="Last name" />
+          <input className="rounded p-2 border border-blue-200" name="email" value={demoForm.email} onChange={handleDemoChange} placeholder="Email*" type="email" required />
+          <input className="rounded p-2 border border-blue-200" name="phone" value={demoForm.phone} onChange={handleDemoChange} placeholder="Phone*" required />
+          <input className="rounded p-2 border border-blue-200" name="age" value={demoForm.age} onChange={handleDemoChange} placeholder="Age*" required />
+          <input className="rounded p-2 border border-blue-200" name="datetime" value={demoForm.datetime} onChange={handleDemoChange} placeholder="Date and time*" required />
+          <textarea className="rounded p-2 border border-blue-200" name="message" value={demoForm.message} onChange={handleDemoChange} placeholder="Message" rows={2} />
+          <button className="bg-gradient-to-r from-blue-500 to-teal-600 text-white font-bold py-2 px-4 rounded-lg shadow hover:from-blue-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50">Submit</button>
+        </form>
+        <h2 className="text-2xl font-bold text-blue-700 mb-2 text-center">Request a Callback</h2>
+        <p className="text-base text-gray-700 mb-4 text-center">Fill the form below to request a callback from our team.</p>
+        <form className="grid gap-4 mb-8" onSubmit={handleCallbackSubmit}>
+          <input className="rounded p-2 border border-blue-200" name="firstName" value={callbackForm.firstName} onChange={handleCallbackChange} placeholder="First name*" required />
+          <input className="rounded p-2 border border-blue-200" name="lastName" value={callbackForm.lastName} onChange={handleCallbackChange} placeholder="Last name" />
+          <input className="rounded p-2 border border-blue-200" name="email" value={callbackForm.email} onChange={handleCallbackChange} placeholder="Email*" type="email" required />
+          <input className="rounded p-2 border border-blue-200" name="phone" value={callbackForm.phone} onChange={handleCallbackChange} placeholder="Phone*" required />
+          <input className="rounded p-2 border border-blue-200" name="datetime" value={callbackForm.datetime} onChange={handleCallbackChange} placeholder="Date and time*" required />
+          <textarea className="rounded p-2 border border-blue-200" name="message" value={callbackForm.message} onChange={handleCallbackChange} placeholder="Message" rows={2} />
+          <button className="bg-gradient-to-r from-blue-500 to-teal-600 text-white font-bold py-2 px-4 rounded-lg shadow hover:from-blue-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50">Submit</button>
+        </form>
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold text-teal-700 mb-2 text-center">Get In Touch</h2>
+          <div className="flex flex-col gap-2 items-center">
+            <div><span className="font-bold text-teal-700">Phone:</span> <a href="tel:+917309051044" className="text-blue-700 underline ml-1">+91 7309051044</a></div>
+            <div><span className="font-bold text-teal-700">Email:</span> <a href="mailto:officialkrrid@gmail.com" className="text-blue-700 underline ml-1">officialkrrid@gmail.com</a></div>
+            <div><span className="font-bold text-teal-700">Address:</span> <span className="text-gray-700 ml-1">Gaurs Shiddhartham Society, Gaur City 2, Ghaziabad, Uttar Pradesh 201009</span></div>
+          </div>
         </div>
-        <ul className="hidden md:flex gap-8 font-sans text-gray-700 text-sm">
-          <li><Link href="/about" className="hover:text-primary">About Us</Link></li>
-          <li><Link href="/plans-courses" className="hover:text-primary">Plans & Courses</Link></li>
-          <li><Link href="/contact" className="hover:text-primary font-semibold text-primary">Contact Us</Link></li>
-        </ul>
-        <div className="flex gap-3 items-center">
-          <button className="bg-black text-white rounded-md px-5 py-2 font-sans text-sm font-medium transition-transform duration-200 hover:scale-105">Book a Demo</button>
-          <Link href="/auth">
-            <button className="bg-white text-black border border-black rounded-md px-5 py-2 font-sans text-sm font-medium shadow-sm transition-transform duration-200 hover:scale-105 hover:bg-gray-50">Sign Up / Login</button>
-          </Link>
-        </div>
-      </nav>
-
-      {/* Page Content */}
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-center text-black mb-8">Contact Us</h1>
-        <p className="text-lg text-gray-700 text-center mb-12">
-          We'd love to hear from you! Whether you have questions about our courses, need support, or just want to say hello, feel free to reach out.
-          (Placeholder content for Contact Us page)
-        </p>
-        
-        {/* Placeholder for a contact form or contact details */}
-        <div className="max-w-lg mx-auto bg-gray-50 p-8 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold text-black mb-6">Send us a message</h2>
-          <form>
-            <div className="mb-4">
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-              <input type="text" id="name" name="name" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary" />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-              <input type="email" id="email" name="email" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary" />
-            </div>
-            <div className="mb-6">
-              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Message</label>
-              <textarea id="message" name="message" rows={4} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"></textarea>
-            </div>
-            <button type="submit" className="w-full bg-black text-white rounded-md px-6 py-3 font-sans text-sm font-medium transition-transform duration-200 hover:scale-105">Send Message</button>
-          </form>
-        </div>
-      </main>
-
-      {/* Footer (Optional) */}
-      {/* <footer className="bg-black text-white p-8 text-center">
-        <p>&copy; {new Date().getFullYear()} Krrid. All rights reserved.</p>
-      </footer> */}
-    </div>
+      </section>
+    </main>
   );
-}
+} 

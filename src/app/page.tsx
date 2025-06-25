@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef, RefObject } from "react";
+import { useState, useEffect, useRef, RefObject, ChangeEvent, FormEvent } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import ChessSpinner from "@/components/ChessSpinner";
@@ -17,6 +17,12 @@ export default function Home() {
   const plansRef = useRef(null);
   const coursesRef = useRef(null);
   const contactRef = useRef(null);
+  const [isDemoOpen, setDemoOpen] = useState(false);
+  const [demoForm, setDemoForm] = useState({
+    firstName: '', lastName: '', email: '', phone: '', age: '', datetime: '', message: ''
+  });
+  const handleDemoChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setDemoForm({ ...demoForm, [e.target.name]: e.target.value });
+  const handleDemoSubmit = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); alert('Demo form submitted: ' + JSON.stringify(demoForm)); };
 
   // Move FAQ array and state here
   const faqs = [
@@ -43,8 +49,18 @@ export default function Home() {
   ];
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
+  // Admin emails
+  const ADMIN_EMAILS = [
+    "anishsingh1250@gmail.com",
+    "vineetsingh05082005@gmail.com",
+    "sudhanshusingh0624@gmail.com",
+  ];
+
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+      setLoading(false);
+    });
     const timer = setTimeout(() => setLoading(false), 2000);
     // Scroll listener for active section
     const handleScroll = () => {
@@ -87,29 +103,87 @@ export default function Home() {
   return (
     <div className="bg-white min-h-screen flex flex-col font-body">
       {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 z-50 bg-white/90 backdrop-blur-md">
-        <div className="flex items-center gap-2">
-          <Image src="/logo.svg" alt="Krrid Logo" width={80} height={40} />
+      <nav className="flex items-center justify-between  px-6 py-0 border-b border-gray-100 sticky top-0 z-50 bg-white/90 backdrop-blur-md">
+        <div className="flex items-center gap-2 pl-[110px] pt-[0px]">
+          <Image src="logo.svg" alt="Krrid Logo" width={155} height={60}  /> 
         </div>
-        <ul className="hidden md:flex gap-8 font-heading text-black text-sm">
-          <li className={`transition-colors duration-200 cursor-pointer ${activeSection === "about" ? "text-primary font-bold" : "hover:text-primary"}`} onClick={() => scrollToSection(aboutRef)}>About Us</li>
-          <li className={`transition-colors duration-200 cursor-pointer ${activeSection === "plans" ? "text-primary font-bold" : "hover:text-primary"}`} onClick={() => scrollToSection(plansRef)}>Plans</li>
-          <li className={`transition-colors duration-200 cursor-pointer ${activeSection === "courses" ? "text-primary font-bold" : "hover:text-primary"}`} onClick={() => scrollToSection(coursesRef)}>Courses</li>
-          <li className={`transition-colors duration-200 cursor-pointer ${activeSection === "contact" ? "text-primary font-bold" : "hover:text-primary"}`} onClick={() => scrollToSection(contactRef)}>Contact Us</li>
+        <ul className="hidden md:flex gap-8  text-black text-lg font-medium font-poppins">
+          <li className={`transition-colors duration-200 cursor-pointer ${activeSection === "about" ? "text-primary font-bold" : "hover:text-primary"}`}>
+            <Link href="/about">About Us</Link>
+          </li>
+          <li className={`transition-colors duration-200 cursor-pointer ${activeSection === "courses" ? "text-primary font-bold" : "hover:text-primary"}`}>
+            <Link href="/courses-curriculum">Courses & Curriculum</Link>
+          </li>
+          <li className={`transition-colors duration-200 cursor-pointer ${activeSection === "contact" ? "text-primary font-bold" : "hover:text-primary"}`}>
+            <Link href="/contact">Contact Us</Link>
+          </li>
         </ul>
         <div className="flex gap-3">
-          <Link href="/auth">
-            <button className="bg-primary text-white rounded-lg px-5 py-2 font-heading text-base font-semibold shadow-lg transition-transform duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/60">Sign Up / Login</button>
-          </Link>
-          <button className="bg-black text-white rounded-lg px-5 py-2 font-heading text-base font-semibold transition-transform duration-200 hover:scale-105 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/60">Book a Demo</button>
+          <button
+            className="bg-black text-white rounded-lg px-5 py-2 font-heading text-base font-semibold transition-transform duration-200 hover:scale-105 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/60"
+            onClick={() => setDemoOpen(true)}
+            aria-haspopup="dialog"
+            aria-expanded={isDemoOpen}
+          >
+            Book a Demo
+          </button>
+          {/* Admin Panel button, only for admins and only after loading */}
+          {!loading && user && ADMIN_EMAILS.includes(user.email) && (
+            <button
+              className="bg-gray-600 text-white rounded-lg px-5 py-2 font-medium font-poppins text-base  transition-transform duration-200 hover:scale-105 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              onClick={() => router.push('/admin')}
+            >
+              Admin Panel
+            </button>
+          )}
         </div>
       </nav>
 
+      {/* Demo Modal */}
+      {isDemoOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-900/80 via-blue-600/80 to-blue-400/80"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setDemoOpen(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative border-4 border-blue-200"
+            onClick={e => e.stopPropagation()}
+            tabIndex={-1}
+          >
+            <button
+              className="absolute top-2 right-2 text-blue-400 hover:text-blue-700 focus:outline-none text-3xl"
+              onClick={() => setDemoOpen(false)}
+              aria-label="Close demo dialog"
+            >
+              &times;
+            </button>
+            <h1 className="text-3xl font-heading font-bold mb-4 text-blue-800" tabIndex={0}>Book Your Free Demo</h1>
+            <p className="text-base text-gray-700 mb-4" tabIndex={0}>
+              Fill the form below to get the available slot.
+            </p>
+            <form className="grid gap-4 mb-2" onSubmit={handleDemoSubmit}>
+              <input className="rounded p-2 border border-blue-200" name="firstName" value={demoForm.firstName} onChange={handleDemoChange} placeholder="First name*" required />
+              <input className="rounded p-2 border border-blue-200" name="lastName" value={demoForm.lastName} onChange={handleDemoChange} placeholder="Last name" />
+              <input className="rounded p-2 border border-blue-200" name="email" value={demoForm.email} onChange={handleDemoChange} placeholder="Email*" type="email" required />
+              <input className="rounded p-2 border border-blue-200" name="phone" value={demoForm.phone} onChange={handleDemoChange} placeholder="Phone*" required />
+              <input className="rounded p-2 border border-blue-200" name="age" value={demoForm.age} onChange={handleDemoChange} placeholder="Age*" required />
+              <input className="rounded p-2 border border-blue-200" name="datetime" value={demoForm.datetime} onChange={handleDemoChange} placeholder="Date and time*" required />
+              <textarea className="rounded p-2 border border-blue-200" name="message" value={demoForm.message} onChange={handleDemoChange} placeholder="Message" rows={2} />
+              <button className="bg-gradient-to-r from-blue-500 to-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow hover:from-blue-600 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50">
+                Book Now
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
-      <section id="hero" className="flex flex-col items-center text-center py-12 px-4 bg-gradient-to-b from-primary/10 to-white relative overflow-hidden">
-        <h1 className="font-heading text-5xl md:text-6xl font-bold leading-tight mb-4">
-          Learn through <br />
-          the <span className="bg-red-500 px-2 italic font-special text-primary">Krrid</span> way!
+      {/* <section id="hero" className="flex flex-col items-center text-center py-12 px-4 bg-gradient-to-b from-primary/10 to-white relative overflow-hidden">
+        <h1 className="krrid-heading text-5xl md:text-6xl font-bold leading-tight mb-4">
+          Learn through<br />the
+          <span className="bg-krrid-highlight"> Krrid</span> way!
         </h1>
         <p className="text-gray-500 max-w-xl mx-auto mb-6 text-lg">
           Unlock genius through play. Krrid blends chess, challenges, and learning to transform curiosity into strategic mastery. Ready to make your move?
@@ -129,18 +203,62 @@ export default function Home() {
           </button>
         </div>
         <div className="w-full flex justify-center">
-          <Image src="/chessboard-hero.png" alt="Chessboard" width={700} height={300} className="rounded-xl shadow-card drop-shadow-[0_0_40px_rgba(37,198,245,0.25)]" />
+          <Image src="/chessboard.svg" alt="Chessboard" width={700} height={300} className="rounded-xl shadow-card drop-shadow-[0_0_40px_rgba(37,198,245,0.25)]" />
         </div>
-      </section>
+      </section> */}
+      <section id="hero" className="relative flex flex-col items-center text-center py-10 px-4   w-full h-[720]">
+
+  {/* Background Image */}
+  <div className="absolute bottom-0   flex justify-center items-center mt-[0px] ">
+    <Image
+      src="/chessboard.svg"
+      alt="Chessboard"
+      width={1690}
+      height={600}
+      className="object-cover"
+    />
+  </div>
+
+  {/* Foreground Text */}
+  <h1 className="krrid-heading text-5xl md:text-6xl font-bold leading-tight mb-6 z-10">
+    Learn through<br />the
+    <span className="bg-krrid-highlight"> Krrid</span> way!
+  </h1>
+  <p className="text-gray-700 max-w-xl mx-auto mb-8 text-xl font-Inter font-regular z-10">
+    Welcome to Krrid, the ultimate destination where games meet learning, and strategy builds success! 
+  </p>
+  <div className="flex gap-4 justify-center mb-8 z-10">
+    <button
+      className="bg-black text-white rounded-lg px-8 py-2 font-heading text-lg font-semibold shadow-md transition-transform duration-200 hover:scale-105 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/60 ripple"
+      onClick={e => { e.currentTarget.classList.add('ripple-animate'); setTimeout(() => e.currentTarget.classList.remove('ripple-animate'), 400); router.push("/chess"); }}
+    >
+      Play
+    </button>
+    <button
+      className="bg-gray-100 text-black rounded-lg px-8 py-2 font-heading text-lg font-semibold border border-gray-300 shadow-md transition-transform duration-200 hover:scale-105 hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/60 ripple"
+      onClick={e => { e.currentTarget.classList.add('ripple-animate'); setTimeout(() => e.currentTarget.classList.remove('ripple-animate'), 400); router.push("/learn"); }}
+    >
+      Learn
+    </button>
+  </div>
+</section>
+
 
       {/* Turn Pawns Into Queens Section */}
-      <section className="relative bg-white py-20 px-4 flex flex-col items-center justify-center overflow-x-clip min-h-[600px] md:min-h-[700px]">
-        <div className="flex w-full max-w-5xl mx-auto items-center justify-between gap-2">
-          <img src="/pawn.png" alt="Pawn" className="hidden md:block h-[240px] w-auto object-contain ml-[-40px]" style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} />
-          <div className="flex-1 flex flex-col items-center justify-center px-2">
-            <h2 className="font-heading text-5xl md:text-6xl font-bold text-center text-[#181f2b] mb-2 leading-tight">
-              Turn Pawns Into Queens With Us!
+      <section className="relative bg-white py-20 px-4 flex flex-row items-center justify-center overflow-x-clip min-h-[600px] md:min-h-[700px]">
+        <div className="flex flex-col w-full max-w-5xl mx-auto items-center justify-between gap-0 ">
+        <h2 className="font-heading text-5xl md:text-[80px] font-Inter font-semibold text-center text-[#181f2b] mb-2 leading-[72px] tracking-[-4.28px]">
+              Turn Pawns Into 
+              <br />Queens With Us!
             </h2>
+          
+        <div className="flex flex-row w-full max-w-5xl  bg-red-500 items-center justify-between gap-0 ">
+        <img src="/pawn.svg" alt="Pawn" className="hidden md:block h-[510px] w-[250px] object-contain" style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} />
+       
+        {/* <div className="flex w-full max-w-5xl mx-auto items-center justify-between gap-2 bg-blue-500"> */}
+          {/* <img src="/pawn.svg" alt="Pawn" className="hidden md:block h-[700px] w-[250px] object-contain ml-[-40px]" style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} /> */}
+          <div className="flex flex flex-col items-center justify-center px-10 ">
+            
             <p className="text-gray-400 text-center max-w-lg mb-6 text-lg">Chess sharpens critical thinking, improve focus, and problem solving skills for school and life!</p>
             <div className="font-heading text-lg font-semibold text-center mb-3 text-[#181f2b]">At Krrid, we make learning fun with:</div>
             <div className="w-full max-w-xl flex flex-col gap-3 mb-2">
@@ -157,7 +275,9 @@ export default function Home() {
             </div>
             <div className="italic text-gray-400 text-center mt-2 text-sm">With Krrid, kids don't just play, they master, grow, and excel!</div>
           </div>
-          <img src="/queen.png" alt="Queen" className="hidden md:block h-[260px] w-auto object-contain mr-[-40px]" style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} />
+          <img src="/queen.svg" alt="Queen" className="hidden md:block h-[510px] w-[250px]  object-contain " style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} />
+        {/* </div> */}
+        </div>
         </div>
       </section>
 
@@ -234,14 +354,14 @@ export default function Home() {
             <path d="M60 100V60C60 30 80 20 100 20V40C90 40 80 50 80 60V100H120V120H60V100Z" fill="url(#rightQuoteGradient)"/>
           </svg>
           <div className="relative z-10 w-full flex flex-col items-center">
-        <TestimonialCarousel />
+            {/* <TestimonialCarousel /> */}
           </div>
-          </div>
+        </div>
         <div className="flex gap-8 justify-center mt-14 z-10">
           {[1, 2, 3].map((n) => (
             <div key={n} className="bg-white rounded-xl w-24 h-24 flex items-center justify-center shadow-lg">
               <Image src="/yt.svg" alt="YouTube" width={40} height={40} />
-          </div>
+            </div>
           ))}
         </div>
       </motion.section>

@@ -1,45 +1,26 @@
-'use client';
-
-import Link from 'next/link';
-import Image from 'next/image';
+import React from 'react';
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-white font-body">
-      {/* Navbar replicating the structure from home page for consistency */}
-      <nav className="flex items-center justify-between px-6 md:px-12 py-4 sticky top-0 z-50 bg-white shadow-sm">
-        <div className="flex items-center">
-          <Link href="/">
-            {/* Assuming logo-text-krrid.svg is the new text-based logo from previous Figma updates */}
-            <Image src="/logo-text-krrid.svg" alt="Krrid Logo" width={100} height={30} />
-          </Link>
-        </div>
-        <ul className="hidden md:flex gap-8 font-sans text-gray-700 text-sm">
-          <li><Link href="/about" className="hover:text-primary font-semibold text-primary">About Us</Link></li>
-          <li><Link href="/plans-courses" className="hover:text-primary">Plans & Courses</Link></li>
-          <li><Link href="/contact" className="hover:text-primary">Contact Us</Link></li>
-        </ul>
-        <div className="flex gap-3 items-center">
-          <button className="bg-black text-white rounded-md px-5 py-2 font-sans text-sm font-medium transition-transform duration-200 hover:scale-105">Book a Demo</button>
-          <Link href="/auth">
-            <button className="bg-white text-black border border-black rounded-md px-5 py-2 font-sans text-sm font-medium shadow-sm transition-transform duration-200 hover:scale-105 hover:bg-gray-50">Sign Up / Login</button>
-          </Link>
-        </div>
-      </nav>
-
-      {/* Page Content */}
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-center text-black mb-8">About Us</h1>
-        <p className="text-lg text-gray-700 text-center">
-          Welcome to Krrid! Learn more about our mission, vision, and the team dedicated to making chess education fun and accessible for everyone.
-          (Placeholder content for About Us page)
+    <main className="min-h-screen bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 flex flex-col items-center justify-center p-8">
+      <section className="bg-white rounded-2xl shadow-xl p-10 max-w-3xl w-full mb-8">
+        <h1 className="text-5xl font-heading font-bold text-blue-800 mb-4 text-center">About Krrid</h1>
+        <p className="text-lg text-gray-700 mb-6 text-center">
+          Welcome to Krrid, the ultimate destination where games meet learning, and strategy builds success! Through chess and interactive challenges, we turn curiosity into brilliance making one move at a time.
         </p>
-      </main>
-
-      {/* Footer (Optional - can be added later or as a shared component) */}
-      {/* <footer className="bg-black text-white p-8 text-center">
-        <p>&copy; {new Date().getFullYear()} Krrid. All rights reserved.</p>
-      </footer> */}
-    </div>
+        <h2 className="text-3xl font-bold text-blue-700 mb-2 text-center">Turn Pawns Into Queens With Us!</h2>
+        <p className="text-base text-gray-600 mb-4 text-center">
+          Chess sharpens critical thinking, improves focus, and problem-solving skills for school and life!
+        </p>
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <li className="bg-blue-50 rounded-lg p-4 text-blue-900 font-semibold shadow">Interactive lessons</li>
+          <li className="bg-blue-50 rounded-lg p-4 text-blue-900 font-semibold shadow">AI & real matches</li>
+          <li className="bg-blue-50 rounded-lg p-4 text-blue-900 font-semibold shadow">Tactical puzzles</li>
+          <li className="bg-blue-50 rounded-lg p-4 text-blue-900 font-semibold shadow">Tournaments & leaderboards</li>
+          <li className="bg-blue-50 rounded-lg p-4 text-blue-900 font-semibold shadow">Expert strategies</li>
+        </ul>
+        <p className="text-lg text-blue-700 font-bold text-center">With Krrid, kids don't just play, they master, grow, and excel!</p>
+      </section>
+    </main>
   );
-}
+} 

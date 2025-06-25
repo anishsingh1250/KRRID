@@ -23,6 +23,7 @@ const config: Config = {
         heading: ['Poppins', 'Montserrat', 'Inter', 'sans-serif'],
         body: ['Inter', 'system-ui', 'sans-serif'],
         special: ['Georgia', 'serif'], // For italic Krrid
+        krrid: ['BeautiqueDisplayCondensed', 'Poppins', 'Montserrat', 'Inter', 'sans-serif'],
       },
       borderRadius: {
         xl: '2rem', // For large rounded cards/sections

@@ -1,155 +1,233 @@
 "use client";
-import { useState } from "react";
-import dynamic from "next/dynamic";
-import { FaChevronLeft, FaChevronRight, FaPlay, FaSearch, FaChevronDown, FaChevronRight as FaChevronRightIcon } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { supabase } from "@/utils/supabaseClient";
 
-// Minimal chessboard (no AI, no move history, no analysis)
-const Chessboard = dynamic(() => import("@/components/ChessboardUI"), { ssr: false });
+const roles = ["student", "admin"];
 
-// Mock course data (structure matches Google Sheet template)
-const courseTree = [
-  {
-    chapter: "I. Beginner",
-    topics: [
-      {
-        topic: "Beginner_CW",
-        positions: [
-          {
-            title: "1. CW-Nature of Game - Position-1",
-            fen: "8/8/8/8/8/8/8/Kk6 w - - 0 1",
-            pgn: "1. Kd6 Ke6",
-            description: "Learn the nature of the game."
-          },
-          {
-            title: "2. CW-Nature of Game - Position-2",
-            fen: "8/8/8/8/8/8/8/KQ6 w - - 0 1",
-            pgn: "1. Qc2 Qf2",
-            description: "Practice with the Queen."
+export default function AuthPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const asPlayer = searchParams ? searchParams.get("asPlayer") : null;
+  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [role, setRole] = useState("student");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [showReset, setShowReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetMsg, setResetMsg] = useState<string | null>(null);
+  const [name, setName] = useState("");
+
+  useEffect(() => {
+    // Listen for auth state changes
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') {
+        if (asPlayer) {
+          router.push("/chess/multiplayer");
+        } else {
+          const userRole = session?.user?.user_metadata?.role;
+          if (userRole && roles.includes(userRole)) {
+            router.push(`/dashboard/${userRole}`);
+          } else {
+            router.push("/dashboard");
           }
-        ]
-      },
-      {
-        topic: "Beginner_HW",
-        positions: [
-          {
-            title: "HW 1 - Practice Puzzles",
-            fen: "8/8/8/8/8/8/8/Kk6 w - - 0 1",
-            pgn: "1. Kd6 Ke6",
-            description: "Homework practice."
-          }
-        ]
+        }
       }
-    ]
+    });
+
+    // Also check on mount (for reloads)
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        if (asPlayer) {
+          router.push("/chess/multiplayer");
+        } else {
+          const userRole = data.user.user_metadata?.role;
+          if (userRole && roles.includes(userRole)) {
+            router.push(`/dashboard/${userRole}`);
+          } else {
+            router.push("/dashboard");
+          }
+        }
+      }
+    });
+
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
+  }, [asPlayer, router]);
+
+  async function handleAuth(e: React.FormEvent) {
+    e.preventDefault();
+    setMessage(null);
+    setLoading(true);
+
+    if (mode === "signup") {
+      if (password !== confirm) {
+        setMessage("Passwords do not match");
+        setLoading(false);
+        return;
+      }
+      // Always set role to 'student' for signup, and include name
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { role: "student", name } },
+      });
+      setLoading(false);
+      setMessage(error ? error.message : "Check your email to confirm your account.");
+    } else {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      setLoading(false);
+      if (error) {
+        setMessage(error.message);
+      } else {
+        if (asPlayer) {
+          router.push("/chess/multiplayer");
+        } else {
+          const user = data.user;
+          const userRole = user?.user_metadata?.role;
+          if (userRole && roles.includes(userRole)) {
+            router.push(`/dashboard/${userRole}`);
+          } else {
+            router.push("/dashboard");
+          }
+        }
+      }
+    }
   }
-];
 
-export default function LearnPage() {
-  const [search, setSearch] = useState("");
-  const [openChapter, setOpenChapter] = useState<number | null>(0);
-  const [openTopic, setOpenTopic] = useState<number | null>(0);
-  const [selectedPosition, setSelectedPosition] = useState<{ chap: number; topic: number; pos: number }>({ chap: 0, topic: 0, pos: 0 });
+  async function handleReset(e: React.FormEvent) {
+    e.preventDefault();
+    setResetMsg(null);
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail);
+    setLoading(false);
+    setResetMsg(error ? error.message : "Check your email for a password reset link.");
+  }
 
-  // Find the current position
-  const currentPosition = courseTree[selectedPosition.chap]?.topics[selectedPosition.topic]?.positions[selectedPosition.pos];
-
-  // Navigation controls for positions
-  const positionsFlat = courseTree.flatMap((chap, chapIdx) =>
-    chap.topics.flatMap((topic, topicIdx) =>
-      topic.positions.map((p, posIdx) => ({ chap: chapIdx, topic: topicIdx, pos: posIdx, ...p }))
-    )
-  ).filter(p => p.title.toLowerCase().includes(search.toLowerCase()));
-  const currentFlatIdx = positionsFlat.findIndex(p => p.chap === selectedPosition.chap && p.topic === selectedPosition.topic && p.pos === selectedPosition.pos);
-  const goPrev = () => {
-    if (currentFlatIdx > 0) setSelectedPosition({ chap: positionsFlat[currentFlatIdx - 1].chap, topic: positionsFlat[currentFlatIdx - 1].topic, pos: positionsFlat[currentFlatIdx - 1].pos });
-  };
-  const goNext = () => {
-    if (currentFlatIdx < positionsFlat.length - 1) setSelectedPosition({ chap: positionsFlat[currentFlatIdx + 1].chap, topic: positionsFlat[currentFlatIdx + 1].topic, pos: positionsFlat[currentFlatIdx + 1].pos });
-  };
-  const goPlay = () => {};
+  async function handleGoogle() {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
+    setLoading(false);
+    if (error) setMessage(error.message);
+  }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-row">
-      {/* Left: Minimal chessboard and controls */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8">
-        <div className="w-full max-w-lg aspect-square bg-white rounded-xl shadow-lg flex items-center justify-center mb-4">
-          <Chessboard fen={currentPosition?.fen === "start" ? undefined : currentPosition?.fen} boardWidth={420} />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="bg-white rounded-xl shadow-card p-8 w-full max-w-md flex flex-col gap-6 border border-gray-200">
+        <div className="flex justify-center gap-4 mb-2">
+          <button
+            className={`font-heading px-4 py-2 rounded-lg transition-colors ${mode === "login" ? "bg-primary text-white" : "bg-gray-200 text-black"}`}
+            onClick={() => setMode("login")}
+          >
+            Login
+          </button>
+          <button
+            className={`font-heading px-4 py-2 rounded-lg transition-colors ${mode === "signup" ? "bg-primary text-white" : "bg-gray-200 text-black"}`}
+            onClick={() => setMode("signup")}
+          >
+            Sign Up
+          </button>
         </div>
-        <div className="flex gap-4 mt-2">
-          <button onClick={goPrev} className="bg-gray-200 hover:bg-primary/20 text-black rounded-full p-3 text-xl"><FaChevronLeft /></button>
-          <button className="bg-green-500 hover:bg-green-600 text-white rounded-full p-3 text-xl"><FaPlay /></button>
-          <button onClick={goNext} className="bg-gray-200 hover:bg-primary/20 text-black rounded-full p-3 text-xl"><FaChevronRight /></button>
-        </div>
-        <div className="mt-6 bg-white rounded-lg shadow p-4 w-full max-w-lg">
-          <h2 className="font-heading text-xl font-bold mb-2 text-[#181f2b]">{currentPosition?.title}</h2>
-          <p className="text-gray-700 mb-2">{currentPosition?.description}</p>
-          <div className="bg-gray-100 rounded p-2 text-xs font-mono mb-2 text-[#181f2b]">PGN: {currentPosition?.pgn}</div>
-        </div>
-      </div>
-      {/* Right: Multi-level collapsible course tree with positions */}
-      <div className="w-[400px] bg-white border-l border-gray-200 p-6 flex flex-col">
-        <div className="flex items-center gap-2 mb-4">
-          <FaSearch className="text-gray-400" />
+
+        <button
+          type="button"
+          className="bg-primary text-white rounded-lg px-4 py-2 font-heading text-base transition-transform duration-200 hover:scale-105 mb-2"
+          onClick={handleGoogle}
+          disabled={loading}
+        >
+          Continue with Google
+        </button>
+
+        <form className="flex flex-col gap-4" onSubmit={handleAuth}>
+          {mode === "signup" && (
+            <input
+              type="text"
+              placeholder="Name"
+              required
+              className="border border-gray-400 rounded-lg px-4 py-2 font-body focus:border-primary outline-none bg-white text-black"
+              value={name}
+              onChange={e => setName(e.target.value)}
+            />
+          )}
           <input
-            type="text"
-            placeholder="Search..."
-            value={search}
-            onChange={e => { setSearch(e.target.value); setSelectedPosition({ chap: 0, topic: 0, pos: 0 }); }}
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-primary"
+            type="email"
+            placeholder="Email"
+            required
+            className="border border-gray-400 rounded-lg px-4 py-2 font-body focus:border-primary outline-none bg-white text-black"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
           />
-        </div>
-        <div className="overflow-y-auto flex-1">
-          {courseTree.map((chap, chapIdx) => (
-            <div key={chapIdx}>
+          <input
+            type="password"
+            placeholder="Password"
+            required
+            className="border border-gray-400 rounded-lg px-4 py-2 font-body focus:border-primary outline-none bg-white text-black"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+          />
+          {mode === "signup" && (
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              required
+              className="border border-gray-400 rounded-lg px-4 py-2 font-body focus:border-primary outline-none bg-white text-black"
+              value={confirm}
+              onChange={e => setConfirm(e.target.value)}
+            />
+          )}
+          <button
+            type="submit"
+            className="bg-primary text-white rounded-lg px-4 py-2 font-heading text-lg transition-transform duration-200 hover:scale-105 hover:bg-primary disabled:opacity-60"
+            disabled={loading}
+          >
+            {loading ? "Processing..." : (mode === "signup" ? "Sign Up" : "Login")}
+          </button>
+        </form>
+
+        {message && (
+          <div className="text-red-500 text-center">{message}</div>
+        )}
+
+        {!showReset ? (
               <button
-                className="flex items-center w-full font-heading font-bold text-lg mb-2 px-2 py-2 rounded hover:bg-primary/10 text-[#181f2b]"
-                onClick={() => setOpenChapter(openChapter === chapIdx ? null : chapIdx)}
+            className="text-primary text-sm hover:underline"
+            onClick={() => setShowReset(true)}
               >
-                {openChapter === chapIdx ? <FaChevronDown className="mr-2" /> : <FaChevronRightIcon className="mr-2" />}
-                {chap.chapter}
+            Forgot Password?
               </button>
-              {openChapter === chapIdx && (
-                <div className="ml-4">
-                  {chap.topics.map((topic, topicIdx) => (
-                    <div key={topicIdx}>
+        ) : (
+          <form onSubmit={handleReset} className="flex flex-col gap-4">
+            <input
+              type="email"
+              placeholder="Enter your email"
+              required
+              className="border border-gray-400 rounded-lg px-4 py-2 font-body focus:border-primary outline-none bg-white text-black"
+              value={resetEmail}
+              onChange={e => setResetEmail(e.target.value)}
+            />
                       <button
-                        className="flex items-center w-full font-heading font-semibold text-base mb-2 px-2 py-2 rounded hover:bg-primary/10 text-[#181f2b]"
-                        onClick={() => setOpenTopic(openTopic === topicIdx ? null : topicIdx)}
+              type="submit"
+              className="bg-primary text-white rounded-lg px-4 py-2 font-heading text-base transition-transform duration-200 hover:scale-105"
+              disabled={loading}
                       >
-                        {openTopic === topicIdx ? <FaChevronDown className="mr-2" /> : <FaChevronRightIcon className="mr-2" />}
-                        {topic.topic}
+              Reset Password
                       </button>
-                      {openTopic === topicIdx && (
-                        <ul>
-                          {topic.positions.filter(p => p.title.toLowerCase().includes(search.toLowerCase())).map((p, posIdx) => (
-                            <li key={posIdx} className="mb-4">
-                              <div className="flex items-center gap-2 mb-1">
-                                <div className="w-16 h-16 bg-gray-100 rounded shadow flex items-center justify-center">
-                                  <Chessboard fen={p.fen === "start" ? undefined : p.fen} boardWidth={64} />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="font-heading text-sm font-bold text-[#181f2b]">{p.title}</div>
-                                  <div className="text-xs text-gray-500">{p.description}</div>
-                                </div>
-                              </div>
-                              <div className="flex gap-2 items-center mb-1">
-                                <button onClick={() => setSelectedPosition({ chap: chapIdx, topic: topicIdx, pos: posIdx })} className="bg-[#7c3aed] text-white rounded px-3 py-1 text-xs font-heading font-semibold hover:bg-primary transition">Load game</button>
-                                <span className="bg-gray-200 rounded px-2 py-1 text-xs font-mono text-[#181f2b]">PGN: {p.pgn}</span>
-                              </div>
-                              <div className="flex gap-2">
-                                <button onClick={() => setSelectedPosition({ chap: chapIdx, topic: topicIdx, pos: Math.max(0, posIdx - 1) })} className="bg-gray-200 hover:bg-primary/20 text-black rounded-full p-1 text-xs"><FaChevronLeft /></button>
-                                <button onClick={() => setSelectedPosition({ chap: chapIdx, topic: topicIdx, pos: Math.min(topic.positions.length - 1, posIdx + 1) })} className="bg-gray-200 hover:bg-primary/20 text-black rounded-full p-1 text-xs"><FaChevronRight /></button>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+            {resetMsg && (
+              <div className="text-red-500 text-center">{resetMsg}</div>
+            )}
+            <button
+              type="button"
+              className="text-primary text-sm hover:underline"
+              onClick={() => setShowReset(false)}
+            >
+              Back to Login
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

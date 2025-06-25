@@ -4,15 +4,6 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabaseClient";
 import { FiLogOut, FiUser, FiBarChart2, FiBookOpen, FiCalendar, FiAward, FiPieChart, FiTarget, FiList, FiClock } from "react-icons/fi";
 
-const sidebarLinks = [
-  { label: "Dashboard", icon: <FiBarChart2 />, href: "/dashboard/student" },
-  { label: "My Games & Courses", icon: <FiBookOpen />, href: "/dashboard/student/courses" },
-  { label: "Achievements", icon: <FiAward />, href: "/dashboard/student/achievements" },
-  { label: "Goals", icon: <FiTarget />, href: "/dashboard/student/goals" },
-  { label: "Leaderboard", icon: <FiAward />, href: "/dashboard/student/leaderboard" },
-  { label: "Schedule", icon: <FiCalendar />, href: "/dashboard/student/schedule" },
-];
-
 export default function StudentDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -21,11 +12,18 @@ export default function StudentDashboard() {
       if (!data.user) router.push("/auth");
       else setUser(data.user);
     });
+    // Custom back button behavior: always go to home page
+    const handlePopState = (event: PopStateEvent) => {
+      event.preventDefault();
+      router.replace("/");
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
   }, [router]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
-    router.push("/auth");
+    router.push("/");
   }
 
   if (!user) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -61,12 +59,25 @@ export default function StudentDashboard() {
     { event: "Opening Strategy Session", date: "May 19" },
   ];
 
+  // Extract user's name from metadata, fallback to email
+  const userName = user.user_metadata?.name || user.email.split("@")[0].replace(/\d+$/, "");
+
+  // Sidebar links
+  const sidebarLinks = [
+    { label: "Dashboard", icon: <FiBarChart2 />, href: "/dashboard/student" },
+    { label: "My Games & Courses", icon: <FiBookOpen />, href: "/dashboard/student/courses" },
+    { label: "Achievements", icon: <FiAward />, href: "/dashboard/student/achievements" },
+    { label: "Goals", icon: <FiTarget />, href: "/dashboard/student/goals" },
+    { label: "Leaderboard", icon: <FiAward />, href: "/dashboard/student/leaderboard" },
+    { label: "Schedule", icon: <FiCalendar />, href: "/dashboard/student/schedule" },
+  ];
+
   return (
     <div className="min-h-screen bg-[#f7fafd] flex">
       {/* Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 bg-[#162447] text-white py-8 px-4 gap-8 shadow-xl">
+      <aside className="hidden md:flex flex-col w-64 bg-gradient-to-b from-[#1ecfff] to-[#162447] text-white py-8 px-4 gap-8 shadow-xl rounded-r-2xl">
         <div className="flex items-center gap-3 mb-8">
-          <div className="bg-[#1ecfff] rounded-full w-12 h-12 flex items-center justify-center text-white text-2xl font-bold">K</div>
+          <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center text-[#1ecfff] text-2xl font-bold">K</div>
           <div>
             <div className="font-heading font-bold text-lg">Krrid</div>
             <div className="text-xs text-[#c6f3ff]">Chess Academy</div>
@@ -74,15 +85,29 @@ export default function StudentDashboard() {
         </div>
         <nav className="flex flex-col gap-2">
           {sidebarLinks.map(link => (
-            <button key={link.label} className="flex items-center gap-3 px-4 py-2 rounded-lg font-heading text-base hover:bg-[#1ecfff] hover:text-[#162447] transition font-semibold">
+            <button
+              key={link.label}
+              onClick={() => router.push(link.href)}
+              className="flex items-center gap-3 px-4 py-2 rounded-lg font-heading text-base hover:bg-white hover:text-[#162447] transition font-semibold focus:outline-none focus:ring-2 focus:ring-white"
+              tabIndex={0}
+            >
               {link.icon} {link.label}
             </button>
           ))}
         </nav>
+        <button
+          onClick={() => router.push("/")}
+          className="flex items-center gap-3 px-4 py-2 rounded-lg font-heading text-base hover:bg-white hover:text-[#162447] transition font-semibold focus:outline-none focus:ring-2 focus:ring-white mb-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l9-9 9 9M4.5 10.5V21h15v-10.5" />
+          </svg>
+          Home
+        </button>
         <div className="mt-auto flex items-center gap-3">
           <FiUser className="text-2xl" />
           <div>
-            <div className="font-heading font-bold text-base">{user.email.split("@")[0]}</div>
+            <div className="font-heading font-bold text-base">{userName}</div>
             <div className="text-xs text-[#c6f3ff]">Level {progress.level} • {progress.xp} XP</div>
           </div>
         </div>
@@ -90,11 +115,43 @@ export default function StudentDashboard() {
       </aside>
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center py-10 px-2 md:px-8">
-        {/* Placeholder image for visual appeal */}
-        <img src="https://placehold.co/1200x200?text=Krrid+Chess+Dashboard" alt="Dashboard Banner" className="rounded-2xl mb-8 w-full max-w-6xl object-cover" />
+        {/* Modern Welcome Section */}
+        <section className="w-full max-w-6xl mb-10">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+            <div>
+              <h1 className="font-heading text-3xl md:text-4xl text-[#181f2b] font-bold">Welcome back, {userName}!</h1>
+              <p className="text-lg text-gray-500 mt-1">Ready for your daily dose of chess mastery?</p>
+            </div>
+            <button
+              className="mt-4 md:mt-0 bg-[#2196f3] hover:bg-[#1769aa] text-white font-heading font-semibold px-6 py-2 rounded-lg shadow transition flex items-center gap-2 self-end"
+              onClick={() => router.push('/dashboard/student/courses')}
+              tabIndex={0}
+            >
+              Continue Learning <span aria-hidden="true">&rarr;</span>
+            </button>
+          </div>
+          <div className="bg-gradient-to-r from-[#1976d2] to-[#2196f3] rounded-2xl shadow-lg p-8 flex flex-col md:flex-row md:items-center md:justify-between relative">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-heading font-bold text-white mb-2">Master the Queen's Gambit</h2>
+              <p className="text-white text-lg mb-4">Complete the course to earn 500 XP</p>
+            </div>
+            <button
+              className="absolute right-8 top-8 md:static md:ml-auto bg-white text-[#1976d2] font-heading font-semibold px-6 py-2 rounded-lg shadow hover:bg-blue-100 transition"
+              onClick={() => router.push('/dashboard/student/courses/queens-gambit')}
+              tabIndex={0}
+            >
+              Start Now
+            </button>
+            <div className="w-full absolute left-0 bottom-4 px-8">
+              <div className="w-full h-2 bg-blue-300 rounded-full">
+                <div className="h-2 bg-white rounded-full" style={{ width: '33%' }}></div>
+              </div>
+              <div className="text-white text-sm mt-1 text-right">33% complete</div>
+            </div>
+          </div>
+        </section>
         {/* Welcome & Progress */}
         <div className="w-full max-w-6xl flex flex-col gap-6 mb-8">
-          <h1 className="font-heading text-3xl md:text-4xl text-[#181f2b] font-bold">Welcome back, {user.email.split("@")[0]}!</h1>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Progress Card */}
             <div className="bg-white rounded-2xl border border-yellow-200 shadow p-6 flex flex-col gap-2">
