@@ -1,57 +1,28 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
-import { useSupabaseData, type Chapter, type Lesson } from '@/hooks/useSupabaseData';
-import { supabase } from '@/integrations/supabase/client';
-import { useRouter } from 'next/navigation';
-
-interface ChapterForm {
-  id?: string;
-  title: string;
-  description: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  position: number;
-}
-
-interface LessonForm {
-  id?: string;
-  chapter_id: string;
-  title: string;
-  description: string;
-  position: number;
-  pgn: string;
-  fen: string;
-  date_played: string;
-  white_player: string;
-  black_player: string;
-  result: string;
-}
+import { useEffect, useState } from "react";
+import { supabaseAdmin as supabase } from "@/utils/supabaseClient";
 
 const ADMIN_EMAILS = [
-  'anishsingh1250@gmail.com',
-  'vineetsingh05082005@gmail.com',
-  'sudhanshusingh0624@gmail.com',
+  "anishsingh1250@gmail.com",
+  "vineetsingh05082005@gmail.com",
+  "sudhanshusingh0624@gmail.com",
 ];
 
-const Admin = () => {
-  const { chapters, lessons, fetchChapters, fetchLessons, getLessonsByChapter } = useSupabaseData();
-  const [editingChapter, setEditingChapter] = useState<ChapterForm | null>(null);
-  const [editingLesson, setEditingLesson] = useState<LessonForm | null>(null);
-  const [activeTab, setActiveTab] = useState<'chapters' | 'lessons'>('chapters');
+export default function AdminPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [showReset, setShowReset] = useState(false);
-  const [resetEmail, setResetEmail] = useState('');
-  const [resetMsg, setResetMsg] = useState('');
-  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'chapters' | 'lessons'>("chapters");
+  const [chapters, setChapters] = useState<any[]>([]);
+  const [lessons, setLessons] = useState<any[]>([]);
+  const [chapterForm, setChapterForm] = useState({ title: "", description: "", position: 1 });
+  const [lessonForm, setLessonForm] = useState({ chapter: "", title: "", description: "", position: 1, white: "", black: "", result: "", date: "", pgn: "", fen: "" });
+  const [editingChapter, setEditingChapter] = useState<any>(null);
+  const [editingLesson, setEditingLesson] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [unauthorized, setUnauthorized] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -60,569 +31,188 @@ const Admin = () => {
     });
   }, []);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    if (!ADMIN_EMAILS.includes(email)) {
-      setError('You are not authorized to access the admin panel.');
-      return;
+  useEffect(() => {
+    if (user && ADMIN_EMAILS.includes(user.email)) {
+      fetchChapters();
+      fetchLessons();
     }
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setError(error.message || 'Invalid login credentials');
-    } else {
-      setUser(data.user);
+  }, [user]);
+
+  useEffect(() => {
+    if (user && !ADMIN_EMAILS.includes(user.email)) {
+      setUnauthorized(true);
+      supabase.auth.signOut().then(() => {
+        window.location.reload();
+      });
     }
-  };
+  }, [user]);
 
-  const handleGoogle = async () => {
-    setError('');
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
-    if (error) setError(error.message);
-  };
-
-  const handleReset = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setResetMsg('');
-    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail);
-    if (error) setResetMsg(error.message);
-    else setResetMsg('Check your email for a password reset link.');
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setEmail('');
-    setPassword('');
-    setError('');
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <span className="text-gray-500 text-lg">Loading...</span>
-      </div>
-    );
+  async function fetchChapters() {
+    const { data, error } = await supabase.from("chapters").select("*").order("position");
+    if (!error) setChapters(data || []);
+  }
+  async function fetchLessons() {
+    const { data, error } = await supabase.from("lessons").select("*").order("position");
+    if (!error) setLessons(data || []);
   }
 
-  if (!user || !ADMIN_EMAILS.includes(user.email)) {
+  async function handleChapterSave(e: any) {
+    e.preventDefault();
+    setError(null);
+    if (!chapterForm.title) { setError("Title required"); return; }
+    if (editingChapter) {
+      await supabase.from("chapters").update({ ...chapterForm }).eq("id", editingChapter.id);
+      setEditingChapter(null);
+    } else {
+      await supabase.from("chapters").insert([{ ...chapterForm }]);
+    }
+    setChapterForm({ title: "", description: "", position: 1 });
+    fetchChapters();
+  }
+  async function handleLessonSave(e: any) {
+    e.preventDefault();
+    setError(null);
+    if (!lessonForm.title || !lessonForm.chapter) { setError("Title and chapter required"); return; }
+    if (editingLesson) {
+      await supabase.from("lessons").update({ ...lessonForm }).eq("id", editingLesson.id);
+      setEditingLesson(null);
+    } else {
+      await supabase.from("lessons").insert([{ ...lessonForm }]);
+    }
+    setLessonForm({ chapter: "", title: "", description: "", position: 1, white: "", black: "", result: "", date: "", pgn: "", fen: "" });
+    fetchLessons();
+  }
+  async function handleDeleteChapter(id: string) {
+    await supabase.from("chapters").delete().eq("id", id);
+    fetchChapters();
+  }
+  async function handleDeleteLesson(id: string) {
+    await supabase.from("lessons").delete().eq("id", id);
+    fetchLessons();
+  }
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    window.location.reload();
+  }
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50">Loading...</div>;
+  if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow w-full max-w-md flex flex-col gap-4">
-          <h2 className="text-2xl font-bold mb-2 text-center text-gray-300">Admin Login</h2>
-          {!showReset ? (
-            <>
-              <input
-                type="email"
-                placeholder="Email"
-                className="border border-gray-300 rounded-lg px-4 py-2"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                className="border border-gray-300 rounded-lg px-4 py-2"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-              />
-              {error && <div className="text-red-500 text-center">{error}</div>}
-              <button
-                type="submit"
-                className="bg-blue-600 text-white rounded-lg px-4 py-2 font-semibold hover:bg-blue-700"
-                onClick={handleLogin}
-              >
-                Login
-              </button>
-              <button
-                type="button"
-                className="bg-green-600 text-white rounded-lg px-4 py-2 font-semibold hover:bg-green-700"
-                onClick={handleGoogle}
-              >
-                Continue with Google
-              </button>
-              <button
-                type="button"
-                className="text-blue-600 text-sm hover:underline mt-2"
-                onClick={() => setShowReset(true)}
-              >
-                Forgot Password?
-              </button>
-            </>
-          ) : (
-            <form onSubmit={handleReset} className="flex flex-col gap-4">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="border border-gray-300 rounded-lg px-4 py-2"
-                value={resetEmail}
-                onChange={e => setResetEmail(e.target.value)}
-                required
-              />
-              <button
-                type="submit"
-                className="bg-blue-600 text-white rounded-lg px-4 py-2 font-semibold hover:bg-blue-700"
-              >
-                Reset Password
-              </button>
-              {resetMsg && <div className="text-center text-red-500">{resetMsg}</div>}
-              <button
-                type="button"
-                className="text-blue-600 text-sm hover:underline mt-2"
-                onClick={() => setShowReset(false)}
-              >
-                Back to Login
-              </button>
-            </form>
-          )}
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md border border-gray-200">
+          <h1 className="text-2xl font-heading font-bold mb-6 text-gray-800 text-center">Admin Login</h1>
+          <form onSubmit={async e => { e.preventDefault(); setLoginError(null); setLoginLoading(true); const { email, password } = loginForm; const { data, error } = await supabase.auth.signInWithPassword({ email, password }); setLoginLoading(false); if (error) setLoginError(error.message); else setUser(data.user); }} className="flex flex-col gap-4">
+            <input type="email" placeholder="Email" className="border border-gray-400 rounded-lg px-4 py-2 font-body focus:border-primary outline-none bg-white text-black" value={loginForm.email} onChange={e => setLoginForm(f => ({ ...f, email: e.target.value }))} required />
+            <input type="password" placeholder="Password" className="border border-gray-400 rounded-lg px-4 py-2 font-body focus:border-primary outline-none bg-white text-black" value={loginForm.password} onChange={e => setLoginForm(f => ({ ...f, password: e.target.value }))} required />
+            <button type="submit" className="bg-primary text-white rounded-lg px-4 py-2 font-heading text-lg transition-transform duration-200 hover:scale-105 hover:bg-primary disabled:opacity-60" disabled={loginLoading}>{loginLoading ? "Logging in..." : "Login"}</button>
+            {loginError && <div className="text-red-500 text-center">{loginError}</div>}
+          </form>
         </div>
       </div>
     );
   }
-
-  const handleSaveChapter = async () => {
-    if (!editingChapter) return;
-
-    try {
-      if (editingChapter.id) {
-        // Update existing chapter
-        const { error } = await supabase
-          .from('chapters')
-          .update({
-            title: editingChapter.title,
-            description: editingChapter.description,
-            difficulty: editingChapter.difficulty,
-            position: editingChapter.position,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', editingChapter.id);
-        
-        if (error) throw error;
-      } else {
-        // Create new chapter
-        const { error } = await supabase
-          .from('chapters')
-          .insert({
-            title: editingChapter.title,
-            description: editingChapter.description,
-            difficulty: editingChapter.difficulty,
-            position: editingChapter.position
-          });
-        
-        if (error) throw error;
-      }
-      
-      setEditingChapter(null);
-      fetchChapters();
-    } catch (error) {
-      console.error('Error saving chapter:', error);
-      alert('Error saving chapter');
-    }
-  };
-
-  const handleSaveLesson = async () => {
-    if (!editingLesson) return;
-
-    try {
-      if (editingLesson.id) {
-        // Update existing lesson
-        const { error } = await supabase
-          .from('lessons')
-          .update({
-            chapter_id: editingLesson.chapter_id,
-            title: editingLesson.title,
-            description: editingLesson.description,
-            position: editingLesson.position,
-            pgn: editingLesson.pgn,
-            fen: editingLesson.fen,
-            date_played: editingLesson.date_played,
-            white_player: editingLesson.white_player,
-            black_player: editingLesson.black_player,
-            result: editingLesson.result,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', editingLesson.id);
-        
-        if (error) throw error;
-      } else {
-        // Create new lesson
-        const { error } = await supabase
-          .from('lessons')
-          .insert({
-            chapter_id: editingLesson.chapter_id,
-            title: editingLesson.title,
-            description: editingLesson.description,
-            position: editingLesson.position,
-            pgn: editingLesson.pgn,
-            fen: editingLesson.fen,
-            date_played: editingLesson.date_played,
-            white_player: editingLesson.white_player,
-            black_player: editingLesson.black_player,
-            result: editingLesson.result
-          });
-        
-        if (error) throw error;
-      }
-      
-      setEditingLesson(null);
-      fetchLessons();
-    } catch (error) {
-      console.error('Error saving lesson:', error);
-      alert('Error saving lesson');
-    }
-  };
-
-  const handleDeleteChapter = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this chapter? This will also delete all associated lessons.')) {
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('chapters')
-        .update({ is_active: false })
-        .eq('id', id);
-      
-      if (error) throw error;
-      fetchChapters();
-    } catch (error) {
-      console.error('Error deleting chapter:', error);
-      alert('Error deleting chapter');
-    }
-  };
-
-  const handleDeleteLesson = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this lesson?')) {
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('lessons')
-        .update({ is_active: false })
-        .eq('id', id);
-      
-      if (error) throw error;
-      fetchLessons();
-    } catch (error) {
-      console.error('Error deleting lesson:', error);
-      alert('Error deleting lesson');
-    }
-  };
+  if (unauthorized) {
+    return <div className="min-h-screen flex items-center justify-center text-red-600 font-bold text-xl bg-gray-50">Access Denied</div>;
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Top Navbar */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Chess Platform Admin</h1>
-            <p className="text-gray-600">Manage chapters and lessons for your chess teaching platform</p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              className="bg-blue-600 text-white hover:bg-blue-700"
-              onClick={() => router.push('/')}
-            >
-              Chess Teaching Platform
-            </Button>
-            <Button
-              className="bg-gray-400 text-white hover:bg-gray-600"
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
-          </div>
+    <div className="min-h-screen bg-[#f7f9fb] p-0 m-0">
+      <div className="max-w-6xl mx-auto py-10">
+        <h1 className="text-3xl font-heading font-bold mb-2">Chess Platform Admin</h1>
+        <p className="mb-6 text-gray-500">Manage chapters and lessons for your chess teaching platform</p>
+        <div className="flex gap-2 mb-6">
+          <button className={`px-4 py-2 rounded font-semibold ${activeTab === 'chapters' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900 border'}`} onClick={() => setActiveTab('chapters')}>Chapters</button>
+          <button className={`px-4 py-2 rounded font-semibold ${activeTab === 'lessons' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900 border'}`} onClick={() => setActiveTab('lessons')}>Lessons</button>
+          <a href="/admin/TeachingPlatform" className="px-4 py-2 rounded font-semibold bg-purple-700 text-white hover:bg-purple-800 transition-colors">Teaching Platform</a>
         </div>
-
-        {/* Tabs */}
-        <div className="flex space-x-1 mb-6">
-          <Button
-            variant={activeTab === 'chapters' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('chapters')}
-          >
-            Chapters
-          </Button>
-          <Button
-            variant={activeTab === 'lessons' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('lessons')}
-          >
-            Lessons
-          </Button>
-        </div>
-
-        {/* Chapters Tab */}
         {activeTab === 'chapters' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-semibold">Chapters</h2>
-              <Button
-                onClick={() => setEditingChapter({
-                  title: '',
-                  description: '',
-                  difficulty: 'beginner',
-                  position: chapters.length + 1
-                })}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Chapter
-              </Button>
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Chapters</h2>
+              <button className="bg-gray-900 text-white px-4 py-2 rounded font-semibold" onClick={() => { setEditingChapter(null); setChapterForm({ title: "", description: "", position: chapters.length + 1 }); }}>+ Add Chapter</button>
             </div>
-
-            {editingChapter && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{editingChapter.id ? 'Edit Chapter' : 'New Chapter'}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Input
-                    placeholder="Chapter Title"
-                    value={editingChapter.title}
-                    onChange={(e) => setEditingChapter({ ...editingChapter, title: e.target.value })}
-                  />
-                  <Textarea
-                    placeholder="Chapter Description"
-                    value={editingChapter.description}
-                    onChange={(e) => setEditingChapter({ ...editingChapter, description: e.target.value })}
-                  />
-                  <div className="flex gap-4">
-                    <select
-                      value={editingChapter.difficulty}
-                      onChange={(e) => setEditingChapter({ 
-                        ...editingChapter, 
-                        difficulty: e.target.value as 'beginner' | 'intermediate' | 'advanced'
-                      })}
-                      className="px-3 py-2 border rounded-md"
-                    >
-                      <option value="beginner">Beginner</option>
-                      <option value="intermediate">Intermediate</option>
-                      <option value="advanced">Advanced</option>
-                    </select>
-                    <Input
-                      type="number"
-                      placeholder="Position"
-                      value={editingChapter.position}
-                      onChange={(e) => setEditingChapter({ ...editingChapter, position: parseInt(e.target.value) })}
-                    />
+            <form className="bg-white rounded-xl shadow p-6 mb-6 max-w-xl" onSubmit={handleChapterSave}>
+              <div className="mb-2 font-semibold">{editingChapter ? "Edit Chapter" : "New Chapter"}</div>
+              <input className="w-full mb-2 px-3 py-2 border rounded" placeholder="Chapter Title" value={chapterForm.title} onChange={e => setChapterForm(f => ({ ...f, title: e.target.value }))} />
+              <textarea className="w-full mb-2 px-3 py-2 border rounded" placeholder="Chapter Description" value={chapterForm.description} onChange={e => setChapterForm(f => ({ ...f, description: e.target.value }))} />
+              <input className="w-full mb-2 px-3 py-2 border rounded" placeholder="Position" type="number" value={chapterForm.position} onChange={e => setChapterForm(f => ({ ...f, position: Number(e.target.value) }))} />
+              <div className="flex gap-2">
+                <button className="bg-gray-900 text-white px-4 py-2 rounded font-semibold" type="submit">Save</button>
+                <button className="bg-gray-200 text-gray-900 px-4 py-2 rounded font-semibold" type="button" onClick={() => { setEditingChapter(null); setChapterForm({ title: "", description: "", position: 1 }); }}>Cancel</button>
+              </div>
+              {error && <div className="text-red-600 mt-2">{error}</div>}
+            </form>
+            {chapters.map((ch) => (
+              <div key={ch.id} className="bg-white rounded-xl shadow p-4 mb-4 flex justify-between items-center">
+                <div>
+                  <div className="font-bold text-lg">{ch.title}</div>
+                  <div className="text-gray-500 text-sm mb-1">{ch.description}</div>
+                  <div className="flex gap-2 text-xs">
+                    <span className="bg-gray-200 rounded px-2 py-1">{ch.title.toLowerCase()}</span>
+                    <span className="bg-gray-200 rounded px-2 py-1">Position: {ch.position}</span>
                   </div>
-                  <div className="flex gap-2">
-                    <Button onClick={handleSaveChapter}>
-                      <Save className="w-4 h-4 mr-2" />
-                      Save
-                    </Button>
-                    <Button variant="outline" onClick={() => setEditingChapter(null)}>
-                      <X className="w-4 h-4 mr-2" />
-                      Cancel
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            <div className="grid gap-4">
-              {chapters.map((chapter) => (
-                <Card key={chapter.id}>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold">{chapter.title}</h3>
-                        <p className="text-gray-600 text-sm mt-1">{chapter.description}</p>
-                        <div className="flex gap-2 mt-2">
-                          <Badge variant="secondary">{chapter.difficulty}</Badge>
-                          <Badge variant="outline">Position: {chapter.position}</Badge>
-                          <Badge variant="outline">{getLessonsByChapter(chapter.id).length} lessons</Badge>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setEditingChapter({
-                            id: chapter.id,
-                            title: chapter.title,
-                            description: chapter.description || '',
-                            difficulty: chapter.difficulty,
-                            position: chapter.position
-                          })}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDeleteChapter(chapter.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                </div>
+                <div className="flex gap-2">
+                  <button className="bg-gray-100 px-2 py-1 rounded" onClick={() => { setEditingChapter(ch); setChapterForm({ title: ch.title, description: ch.description, position: ch.position }); }}>✏️</button>
+                  <button className="bg-gray-100 px-2 py-1 rounded" onClick={() => handleDeleteChapter(ch.id)}>🗑️</button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
-
-        {/* Lessons Tab */}
         {activeTab === 'lessons' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-semibold">Lessons</h2>
-              <Button
-                onClick={() => setEditingLesson({
-                  chapter_id: chapters[0]?.id || '',
-                  title: '',
-                  description: '',
-                  position: lessons.length + 1,
-                  pgn: '',
-                  fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-                  date_played: '',
-                  white_player: '',
-                  black_player: '',
-                  result: ''
-                })}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Lesson
-              </Button>
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Lessons</h2>
+              <button className="bg-gray-900 text-white px-4 py-2 rounded font-semibold" onClick={() => { setEditingLesson(null); setLessonForm({ chapter: chapters[0]?.title || "", title: "", description: "", position: lessons.length + 1, white: "", black: "", result: "", date: "", pgn: "", fen: "" }); }}>+ Add Lesson</button>
             </div>
-
-            {editingLesson && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{editingLesson.id ? 'Edit Lesson' : 'New Lesson'}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <select
-                    value={editingLesson.chapter_id}
-                    onChange={(e) => setEditingLesson({ ...editingLesson, chapter_id: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md"
-                  >
-                    {chapters.map(chapter => (
-                      <option key={chapter.id} value={chapter.id}>{chapter.title}</option>
-                    ))}
-                  </select>
-                  <Input
-                    placeholder="Lesson Title"
-                    value={editingLesson.title}
-                    onChange={(e) => setEditingLesson({ ...editingLesson, title: e.target.value })}
-                  />
-                  <Textarea
-                    placeholder="Lesson Description"
-                    value={editingLesson.description}
-                    onChange={(e) => setEditingLesson({ ...editingLesson, description: e.target.value })}
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      placeholder="Position"
-                      type="number"
-                      value={editingLesson.position}
-                      onChange={(e) => setEditingLesson({ ...editingLesson, position: parseInt(e.target.value) })}
-                    />
-                    <Input
-                      placeholder="Date Played"
-                      value={editingLesson.date_played}
-                      onChange={(e) => setEditingLesson({ ...editingLesson, date_played: e.target.value })}
-                    />
-                    <Input
-                      placeholder="White Player"
-                      value={editingLesson.white_player}
-                      onChange={(e) => setEditingLesson({ ...editingLesson, white_player: e.target.value })}
-                    />
-                    <Input
-                      placeholder="Black Player"
-                      value={editingLesson.black_player}
-                      onChange={(e) => setEditingLesson({ ...editingLesson, black_player: e.target.value })}
-                    />
+            <form className="bg-white rounded-xl shadow p-6 mb-6 max-w-xl" onSubmit={handleLessonSave}>
+              <div className="mb-2 font-semibold">{editingLesson ? "Edit Lesson" : "New Lesson"}</div>
+              <select className="w-full mb-2 px-3 py-2 border rounded" value={lessonForm.chapter} onChange={e => setLessonForm(f => ({ ...f, chapter: e.target.value }))}>
+                <option value="">Select Chapter</option>
+                {chapters.map(ch => <option key={ch.id} value={ch.title}>{ch.title}</option>)}
+              </select>
+              <input className="w-full mb-2 px-3 py-2 border rounded" placeholder="Lesson Title" value={lessonForm.title} onChange={e => setLessonForm(f => ({ ...f, title: e.target.value }))} />
+              <textarea className="w-full mb-2 px-3 py-2 border rounded" placeholder="Lesson Description" value={lessonForm.description} onChange={e => setLessonForm(f => ({ ...f, description: e.target.value }))} />
+              <input className="w-full mb-2 px-3 py-2 border rounded" placeholder="Position" type="number" value={lessonForm.position} onChange={e => setLessonForm(f => ({ ...f, position: Number(e.target.value) }))} />
+              <div className="flex gap-2 mb-2">
+                <input className="w-full px-3 py-2 border rounded" placeholder="White Player" value={lessonForm.white} onChange={e => setLessonForm(f => ({ ...f, white: e.target.value }))} />
+                <input className="w-full px-3 py-2 border rounded" placeholder="Black Player" value={lessonForm.black} onChange={e => setLessonForm(f => ({ ...f, black: e.target.value }))} />
+              </div>
+              <div className="flex gap-2 mb-2">
+                <input className="w-full px-3 py-2 border rounded" placeholder="Result (e.g., 1-0, 0-1, 1/2-1/2)" value={lessonForm.result} onChange={e => setLessonForm(f => ({ ...f, result: e.target.value }))} />
+                <input className="w-full px-3 py-2 border rounded" placeholder="Date Played" value={lessonForm.date} onChange={e => setLessonForm(f => ({ ...f, date: e.target.value }))} />
+              </div>
+              <input className="w-full mb-2 px-3 py-2 border rounded" placeholder="PGN (e.g., 1. e4 e5 2. Nf3 Nc6)" value={lessonForm.pgn} onChange={e => setLessonForm(f => ({ ...f, pgn: e.target.value }))} />
+              <input className="w-full mb-2 px-3 py-2 border rounded" placeholder="FEN Position" value={lessonForm.fen} onChange={e => setLessonForm(f => ({ ...f, fen: e.target.value }))} />
+              <div className="flex gap-2">
+                <button className="bg-gray-900 text-white px-4 py-2 rounded font-semibold" type="submit">Save</button>
+                <button className="bg-gray-200 text-gray-900 px-4 py-2 rounded font-semibold" type="button" onClick={() => { setEditingLesson(null); setLessonForm({ chapter: chapters[0]?.title || "", title: "", description: "", position: 1, white: "", black: "", result: "", date: "", pgn: "", fen: "" }); }}>Cancel</button>
+              </div>
+              {error && <div className="text-red-600 mt-2">{error}</div>}
+            </form>
+            {lessons.map((ls) => (
+              <div key={ls.id} className="bg-white rounded-xl shadow p-4 mb-4 flex justify-between items-center">
+                <div>
+                  <div className="font-bold text-lg">{ls.title}</div>
+                  <div className="text-gray-500 text-sm mb-1">{ls.description}</div>
+                  <div className="flex gap-2 text-xs mb-1">
+                    <span className="bg-gray-200 rounded px-2 py-1">{ls.chapter}</span>
+                    <span className="bg-gray-200 rounded px-2 py-1">Position: {ls.position}</span>
+                    <span className="bg-gray-200 rounded px-2 py-1">{ls.date}</span>
                   </div>
-                  <Input
-                    placeholder="Result (e.g., 1-0, 0-1, 1/2-1/2)"
-                    value={editingLesson.result}
-                    onChange={(e) => setEditingLesson({ ...editingLesson, result: e.target.value })}
-                  />
-                  <Textarea
-                    placeholder="PGN (e.g., 1. e4 e5 2. Nf3 Nc6)"
-                    value={editingLesson.pgn}
-                    onChange={(e) => setEditingLesson({ ...editingLesson, pgn: e.target.value })}
-                    className="font-mono text-sm"
-                  />
-                  <Textarea
-                    placeholder="FEN Position"
-                    value={editingLesson.fen}
-                    onChange={(e) => setEditingLesson({ ...editingLesson, fen: e.target.value })}
-                    className="font-mono text-sm"
-                  />
-                  <div className="flex gap-2">
-                    <Button onClick={handleSaveLesson}>
-                      <Save className="w-4 h-4 mr-2" />
-                      Save
-                    </Button>
-                    <Button variant="outline" onClick={() => setEditingLesson(null)}>
-                      <X className="w-4 h-4 mr-2" />
-                      Cancel
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            <div className="grid gap-4">
-              {lessons.map((lesson) => {
-                const chapter = chapters.find(c => c.id === lesson.chapter_id);
-                return (
-                  <Card key={lesson.id}>
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold">{lesson.title}</h3>
-                          <p className="text-gray-600 text-sm mt-1">{lesson.description}</p>
-                          <div className="flex gap-2 mt-2">
-                            <Badge variant="secondary">{chapter?.title}</Badge>
-                            <Badge variant="outline">Position: {lesson.position}</Badge>
-                            {lesson.date_played && <Badge variant="outline">{lesson.date_played}</Badge>}
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingLesson({
-                              id: lesson.id,
-                              chapter_id: lesson.chapter_id,
-                              title: lesson.title,
-                              description: lesson.description || '',
-                              position: lesson.position,
-                              pgn: lesson.pgn || '',
-                              fen: lesson.fen || '',
-                              date_played: lesson.date_played || '',
-                              white_player: lesson.white_player || '',
-                              black_player: lesson.black_player || '',
-                              result: lesson.result || ''
-                            })}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteLesson(lesson.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                  <div className="text-xs text-gray-400">PGN: {ls.pgn}</div>
+                </div>
+                <div className="flex gap-2">
+                  <button className="bg-gray-100 px-2 py-1 rounded" onClick={() => { setEditingLesson(ls); setLessonForm({ chapter: ls.chapter, title: ls.title, description: ls.description, position: ls.position, white: ls.white, black: ls.black, result: ls.result, date: ls.date, pgn: ls.pgn, fen: ls.fen }); }}>✏️</button>
+                  <button className="bg-gray-100 px-2 py-1 rounded" onClick={() => handleDeleteLesson(ls.id)}>🗑️</button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
+        <button onClick={handleLogout} className="mt-10 bg-gray-200 hover:bg-gray-400 text-gray-800 rounded-lg px-4 py-2 font-heading font-semibold shadow">Logout</button>
       </div>
     </div>
   );
-};
-
-export default Admin; 
+} 

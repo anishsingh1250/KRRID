@@ -1,65 +1,90 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 
-const testimonials = [
+interface Testimonial {
+  name: string;
+  image: string;
+  text: string;
+}
+
+const testimonials: Testimonial[] = [
   {
-    name: "Alice K.",
-    text: "This chess platform helped me improve my game tremendously! The lessons are clear and the interface is beautiful.",
-    title: "Beginner Player"
+    name: 'Kundan Kumar',
+    image: '/handshake.svg', // Make sure this image exists in public/
+    text: 'I had no prior experience with chess, but the structured lessons and live sessions made learning easy and fun! Now, I can confidently play with friends and family. Highly recommended.'
   },
   {
-    name: "Coach Bob",
-    text: "As a coach, I love how easy it is to assign lessons and track progress. Highly recommended!",
-    title: "Chess Coach"
+    name: 'Aarav Sharma',
+    image: '/handshake.svg',
+    text: 'Krrid helped me improve my chess skills quickly. The coaches are friendly and the lessons are interactive. I love the tournaments!'
   },
   {
-    name: "Sophie L.",
-    text: "The puzzles and interactive boards make learning chess fun and engaging for my kids.",
-    title: "Parent"
+    name: 'Priya Singh',
+    image: '/handshake.svg',
+    text: 'The best chess learning platform for kids! My child enjoys every session and has become much more confident.'
   }
 ];
 
-const TestimonialCarousel: React.FC = () => {
-  const [index, setIndex] = useState(0);
-  const next = () => setIndex((i) => (i + 1) % testimonials.length);
-  const prev = () => setIndex((i) => (i - 1 + testimonials.length) % testimonials.length);
+export default function TestimonialCarousel() {
+  const [current, setCurrent] = useState(0);
+  const length = testimonials.length;
+
+  // Auto-rotate every 5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [length]);
+
+  const goTo = (idx: number) => setCurrent(idx);
+  const prev = () => setCurrent((prev) => (prev - 1 + length) % length);
+  const next = () => setCurrent((prev) => (prev + 1) % length);
 
   return (
-    <div className="w-full max-w-xl mx-auto bg-white rounded-xl shadow-lg p-6 flex flex-col items-center">
-      <div className="relative w-full flex flex-col items-center min-h-[120px]">
-        <p className="text-lg text-gray-700 text-center italic mb-4 transition-all duration-300 min-h-[60px]">
-          "{testimonials[index].text}"
-        </p>
-        <div className="flex flex-col items-center">
-          <span className="font-bold text-primary text-base">{testimonials[index].name}</span>
-          <span className="text-xs text-gray-500">{testimonials[index].title}</span>
+    <div className="relative w-full max-w-2xl mx-auto flex flex-col items-center rounded-2xl p-8 shadow-lg">
+      {/* Testimonial Content */}
+      <div className="flex flex-row items-center gap-6 w-full">
+        <div className="flex flex-col items-center min-w-[120px]">
+          <Image
+            src={testimonials[current].image}
+            alt={testimonials[current].name}
+            width={80}
+            height={80}
+            className="rounded-full object-cover border-4 border-white shadow"
+          />
+          <span className="mt-3 text-primary text-base font-semibold text-center">{testimonials[current].name}</span>
         </div>
+        <p className="text-white text-lg text-left font-Inter font-normal leading-relaxed">{testimonials[current].text}</p>
       </div>
-      <div className="flex gap-4 mt-6">
-        <button
-          onClick={prev}
-          className="bg-gray-200 hover:bg-primary/20 text-black rounded-full p-2 transition"
-          aria-label="Previous testimonial"
-        >
-          <svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M13 15l-5-5 5-5" stroke="#18181b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        </button>
-        <button
-          onClick={next}
-          className="bg-gray-200 hover:bg-primary/20 text-black rounded-full p-2 transition"
-          aria-label="Next testimonial"
-        >
-          <svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M7 5l5 5-5 5" stroke="#18181b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        </button>
-      </div>
-      <div className="flex gap-1 mt-3">
-        {testimonials.map((_, i) => (
-          <span
-            key={i}
-            className={`inline-block w-2 h-2 rounded-full ${i === index ? "bg-primary" : "bg-gray-300"}`}
+      {/* Navigation Dots */}
+      <div className="flex gap-2 mt-6 items-center justify-center">
+        {testimonials.map((_, idx) => (
+          <button
+            key={idx}
+            className={`w-3 h-3 rounded-full transition-all duration-200 ${idx === current ? 'bg-white' : 'bg-gray-500/50'}`}
+            onClick={() => goTo(idx)}
+            aria-label={`Go to testimonial ${idx + 1}`}
           />
         ))}
       </div>
+      {/* Arrows */}
+      <button
+        className="absolute left-1 top-1/2 -translate-y-1/2  hover:bg-white/60 hover:rounded-full text-white  p-2"
+        onClick={prev}
+        aria-label="Previous testimonial"
+        style={{ zIndex: 2 }}
+      >
+        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <button
+        className="absolute right-0 top-1/2 -translate-y-1/2  hover:bg-white/60 hover:rounded-full text-white rounded-full p-2"
+        onClick={next}
+        aria-label="Next testimonial"
+        style={{ zIndex: 2 }}
+      >
+        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
     </div>
   );
-};
-
-export default TestimonialCarousel; 
+} 

@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from 'react';
-import { supabase as teachingSupabase } from '../../temp-chess-platform/src/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Chapter {
   id: string;
@@ -38,7 +39,7 @@ export const useSupabaseData = () => {
   const fetchChapters = async () => {
     try {
       console.log('Fetching chapters...');
-      const { data, error } = await teachingSupabase
+      const { data, error } = await supabase
         .from('chapters')
         .select('*')
         .eq('is_active', true)
@@ -46,11 +47,7 @@ export const useSupabaseData = () => {
       
       if (error) throw error;
       console.log('Chapters fetched:', data);
-      setChapters((data || []).map((c: any) => ({
-        ...c,
-        description: c.description ?? '',
-        difficulty: c.difficulty as 'beginner' | 'intermediate' | 'advanced',
-      })));
+      setChapters(data || []);
     } catch (err) {
       console.error('Error fetching chapters:', err);
       setError('Failed to fetch chapters');
@@ -60,7 +57,7 @@ export const useSupabaseData = () => {
   const fetchLessons = async (chapterId?: string) => {
     try {
       console.log('Fetching lessons...');
-      let query = teachingSupabase
+      let query = supabase
         .from('lessons')
         .select('*')
         .eq('is_active', true);
@@ -73,16 +70,7 @@ export const useSupabaseData = () => {
       
       if (error) throw error;
       console.log('Lessons fetched:', data);
-      setLessons((data || []).map((l: any) => ({
-        ...l,
-        description: l.description ?? '',
-        pgn: l.pgn ?? '',
-        fen: l.fen ?? '',
-        date_played: l.date_played ?? '',
-        white_player: l.white_player ?? '',
-        black_player: l.black_player ?? '',
-        result: l.result ?? '',
-      })));
+      setLessons(data || []);
     } catch (err) {
       console.error('Error fetching lessons:', err);
       setError('Failed to fetch lessons');
@@ -94,7 +82,7 @@ export const useSupabaseData = () => {
       console.log('Adding sample data...');
       
       // Add more chapters with proper typing
-      const { data: existingChapters } = await teachingSupabase
+      const { data: existingChapters } = await supabase
         .from('chapters')
         .select('title');
       
@@ -106,14 +94,14 @@ export const useSupabaseData = () => {
         difficulty: 'beginner' | 'intermediate' | 'advanced';
         position: number;
       }> = [
-        { title: 'Openings', description: 'Learn fundamental chess openings', difficulty: 'intermediate' as 'intermediate', position: 4 },
-        { title: 'Tactics', description: 'Practice tactical combinations', difficulty: 'intermediate' as 'intermediate', position: 5 },
-        { title: 'Endgames', description: 'Master essential endgame positions', difficulty: 'advanced' as 'advanced', position: 6 },
-        { title: 'Famous Games', description: 'Study games from chess masters', difficulty: 'advanced' as 'advanced', position: 7 }
+        { title: 'Openings', description: 'Learn fundamental chess openings', difficulty: 'intermediate', position: 4 },
+        { title: 'Tactics', description: 'Practice tactical combinations', difficulty: 'intermediate', position: 5 },
+        { title: 'Endgames', description: 'Master essential endgame positions', difficulty: 'advanced', position: 6 },
+        { title: 'Famous Games', description: 'Study games from chess masters', difficulty: 'advanced', position: 7 }
       ].filter(chapter => !existingTitles.includes(chapter.title));
 
       if (newChapters.length > 0) {
-        const { error: chaptersError } = await teachingSupabase
+        const { error: chaptersError } = await supabase
           .from('chapters')
           .insert(newChapters);
         
@@ -121,7 +109,7 @@ export const useSupabaseData = () => {
       }
 
       // Fetch updated chapters
-      const { data: allChapters } = await teachingSupabase
+      const { data: allChapters } = await supabase
         .from('chapters')
         .select('*')
         .order('position');
@@ -166,7 +154,7 @@ export const useSupabaseData = () => {
       for (const lesson of sampleLessons) {
         const chapter = allChapters?.find(c => c.title === lesson.chapter_title);
         if (chapter) {
-          const { data: existingLesson } = await teachingSupabase
+          const { data: existingLesson } = await supabase
             .from('lessons')
             .select('id')
             .eq('chapter_id', chapter.id)
@@ -174,7 +162,7 @@ export const useSupabaseData = () => {
             .single();
 
           if (!existingLesson) {
-            const { error: lessonError } = await teachingSupabase
+            const { error: lessonError } = await supabase
               .from('lessons')
               .insert({
                 chapter_id: chapter.id,

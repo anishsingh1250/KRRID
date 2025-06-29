@@ -1,111 +1,58 @@
-// This file will be moved to src/app/learn/page.tsx for the protected Learn page.
 "use client";
 import { useState } from "react";
-import dynamic from "next/dynamic";
-import ChessPuzzle from "@/components/ChessPuzzle";
-import ChessGameReplay from "@/components/ChessGameReplay";
-import MasterGames from "@/components/MasterGames";
-import { FaChessBoard, FaPuzzlePiece, FaHistory, FaGraduationCap, FaUsers } from "react-icons/fa";
+import ChessboardUI from "@/components/ChessboardUI";
+import { useChessGame } from "@/hooks/useChessGame";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-// Dynamically import ChessboardUI to avoid SSR issues
-const Chessboard = dynamic(() => import("@/components/ChessboardUI"), { ssr: false });
-
-// Sample/mock data for course tree and lessons
-const sampleCourse = {
-  title: "Chess Fundamentals",
-  sections: [
-    {
-      title: "Introduction",
-      lessons: [
-        {
-          title: "Welcome to Chess",
-          content: "Chess is a game of strategy and skill. In this lesson, you'll learn the basics of the game, the board, and the pieces.",
-          imageUrl: "https://placehold.co/400x200?text=Chess+Intro",
-          videoUrl: "https://www.youtube.com/embed/NAIQyoPcjNM",
-          fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-        }
-      ]
-    },
-    {
-      title: "Basic Moves",
-      lessons: [
-        {
-          title: "How Pieces Move",
-          content: "Each chess piece moves differently. Let's explore how each one works!",
-          imageUrl: "https://placehold.co/400x200?text=Piece+Movement",
-          videoUrl: "https://www.youtube.com/embed/NAIQyoPcjNM",
-          fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-        }
-      ]
-    }
-  ]
-};
-
-export default function ChessPage() {
-  const [tab, setTab] = useState<"play" | "puzzle" | "replay" | "study">("play");
+export default function ChessMainPage() {
   const router = useRouter();
+  const { gameState, makeMove, reset, goToPrevious, goToNext } = useChessGame();
+  const [orientation, setOrientation] = useState<'white' | 'black'>('white');
+
+  function handleMove(fen: string, move: any, turn: string) {
+    makeMove(move.from, move.to, move.promotion);
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#e0e7ef] to-[#f0d9b5] py-8 px-2 md:px-8 flex flex-col items-center">
-      <div className="w-full max-w-5xl bg-white/90 rounded-3xl shadow-2xl p-8 mb-6 flex flex-col items-center border border-[#e0e0e0]">
-        <h1 className="font-heading text-3xl md:text-4xl mb-6 text-primary drop-shadow font-bold tracking-tight">Chess Playground</h1>
-        <div className="flex flex-wrap gap-2 md:gap-4 mb-8 justify-center">
-          <button
-            onClick={() => setTab("play")}
-            className={`flex items-center gap-2 px-7 py-3 rounded-full font-heading text-lg font-semibold transition-all duration-200 shadow-md border-2 ${tab === "play" ? "bg-primary text-white border-primary scale-105" : "bg-gray-100 text-black border-transparent hover:bg-primary/10 hover:scale-105"}`}
-          >
-            <FaChessBoard /> Play
-          </button>
-          <button
-            onClick={() => setTab("puzzle")}
-            className={`flex items-center gap-2 px-7 py-3 rounded-full font-heading text-lg font-semibold transition-all duration-200 shadow-md border-2 ${tab === "puzzle" ? "bg-primary text-white border-primary scale-105" : "bg-gray-100 text-black border-transparent hover:bg-primary/10 hover:scale-105"}`}
-          >
-            <FaPuzzlePiece /> Puzzles
-          </button>
-          <button
-            onClick={() => setTab("replay")}
-            className={`flex items-center gap-2 px-7 py-3 rounded-full font-heading text-lg font-semibold transition-all duration-200 shadow-md border-2 ${tab === "replay" ? "bg-primary text-white border-primary scale-105" : "bg-gray-100 text-black border-transparent hover:bg-primary/10 hover:scale-105"}`}
-          >
-            <FaHistory /> Replay
-          </button>
-          <button
-            onClick={() => setTab("study")}
-            className={`flex items-center gap-2 px-7 py-3 rounded-full font-heading text-lg font-semibold transition-all duration-200 shadow-md border-2 ${tab === "study" ? "bg-primary text-white border-primary scale-105" : "bg-gray-100 text-black border-transparent hover:bg-primary/10 hover:scale-105"}`}
-          >
-            <FaGraduationCap /> Study
-          </button>
-          <button
-            onClick={() => router.push("/auth?asPlayer=true")}
-            className="flex items-center gap-2 px-7 py-3 rounded-full font-heading text-lg font-semibold transition-all duration-200 shadow-md border-2 bg-green-500 text-white border-green-500 hover:bg-green-600 hover:scale-105"
-          >
-            <FaUsers /> Multiplayer
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-black via-blue-950 to-black flex flex-col items-center w-full">
+      <div className="flex flex-col md:flex-row w-full max-w-7xl mx-auto gap-8 py-10 px-4">
+        {/* Chessboard Section */}
+        <div className="flex flex-col items-center bg-[#23272b] rounded-2xl p-6 shadow-xl border border-blue-900">
+          <ChessboardUI
+            fen={gameState.position}
+            boardOrientation={orientation}
+            boardWidth={480}
+          />
         </div>
-        <div className="w-full flex flex-col items-center min-h-[600px]">
-          {tab === "play" && (
-            <div className="w-full flex flex-col items-center">
-              <Chessboard />
-              <p className="mt-6 text-gray-600 text-lg font-medium">Play against AI or a friend. <span className="italic">(Coming soon: matchmaking!)</span></p>
+        {/* Right Panel */}
+        <div className="flex-1 flex flex-col gap-8 justify-center items-center md:items-start mt-8 md:mt-0">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">Play Chess Online<br/>on the <span className="text-blue-400">#1 Site!</span></h1>
+          <div className="flex flex-col gap-6 w-full max-w-sm">
+            <div className="flex items-center gap-4 bg-sky-600/90 rounded-2xl shadow-lg p-6 cursor-pointer hover:scale-105 transition-transform border-2 border-sky-700" onClick={() => router.push("/chess/multiplayer")}> 
+              <Image src="/play-online.png" alt="Play Online" width={56} height={56} />
+              <div className="flex flex-col">
+                <span className="text-2xl font-extrabold text-white">Play Online</span>
+                <span className="text-white text-base font-medium mt-1">Play with someone at your level</span>
+              </div>
             </div>
-          )}
-          {tab === "puzzle" && (
-            <div className="w-full flex flex-col items-center">
-              <ChessPuzzle />
+            <div className="flex items-center gap-4 bg-gray-800/90 rounded-2xl shadow-lg p-6 cursor-pointer hover:scale-105 transition-transform border-2 border-gray-700" onClick={() => router.push("/chess/play")}> 
+              <Image src="/play-computer.png" alt="Play Computer" width={56} height={56} />
+              <div className="flex flex-col">
+                <span className="text-2xl font-extrabold text-white">Play Computer</span>
+                <span className="text-gray-200 text-base font-medium mt-1">Play vs customizable training bots</span>
+              </div>
             </div>
-          )}
-          {tab === "replay" && (
-            <div className="w-full flex flex-col items-center">
-              <ChessGameReplay />
+          </div>
+          <div className="mt-10 w-full">
+            <h2 className="text-2xl font-bold text-white mb-3">Solve Chess Puzzles</h2>
+            <div className="bg-blue-900/80 rounded-xl p-4 flex items-center gap-4 shadow-lg cursor-pointer hover:scale-105 transition-transform border-2 border-blue-700" onClick={() => router.push("/chess/puzzles")}> 
+              <Image src="/chessboard.svg" alt="Puzzles" width={60} height={60} />
+              <span className="text-lg text-white font-semibold">Sharpen your skills with fun puzzles!</span>
             </div>
-          )}
-          {tab === "study" && (
-            <div className="w-full flex flex-col items-center">
-              <MasterGames />
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
   );
-}
+} 

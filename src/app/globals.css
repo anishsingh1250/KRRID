@@ -19,6 +19,17 @@ body {
   /* font-family: Arial, Helvetica, sans-serif; */
 }
 
+/* Inter Font Face Declarations */
+
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/interblack.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @font-face {
   font-family: 'BeautiqueDisplayCondensed';
   
@@ -32,10 +43,13 @@ body {
   font-weight: 900;
 }
 
+
+
+
 .krrid-heading {
   font-family: 'BeautiqueDisplayCondensed';
   font-weight: 900;
-  font-size: 72px;
+  font-size: 68px;
   color: #0a0a0a;
 
 }
@@ -45,8 +59,12 @@ body {
   font-family: 'BeautiqueDisplayCondensed-BlackItalic';
   background: linear-gradient(90deg, #47D4EB 0%, #ffffff 100%);
   display: inline-block;
+  line-height: 0.9;
+
+  /* letter-spacing: -0.02em; */
   /* border-radius: 0.18em; */
-  padding: 0 0 0 0.2em;
+  padding-left: 0.1em;
+  padding-top: 0.18em;
   margin: 0 0.2em;
 }
 

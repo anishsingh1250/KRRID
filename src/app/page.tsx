@@ -1,12 +1,12 @@
 'use client';
 import { useState, useEffect, useRef, RefObject, ChangeEvent, FormEvent } from "react";
+import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin, FaYoutube } from 'react-icons/fa';
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
-import ChessSpinner from "@/components/ChessSpinner";
-import TestimonialCarousel from "@/components/TestimonialCarousel";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabaseClient";
+import TestimonialCarousel from "@/components/TestimonialCarousel";
 
 export default function Home() {
   const router = useRouter();
@@ -57,10 +57,7 @@ export default function Home() {
   ];
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-      setLoading(false);
-    });
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
     const timer = setTimeout(() => setLoading(false), 2000);
     // Scroll listener for active section
     const handleScroll = () => {
@@ -95,7 +92,7 @@ export default function Home() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <ChessSpinner />
+        <span className="text-lg text-gray-400">Loading...</span>
       </div>
     );
   }
@@ -103,22 +100,24 @@ export default function Home() {
   return (
     <div className="bg-white min-h-screen flex flex-col font-body">
       {/* Navbar */}
-      <nav className="flex items-center justify-between  px-6 py-0 border-b border-gray-100 sticky top-0 z-50 bg-white/90 backdrop-blur-md">
-        <div className="flex items-center gap-2 pl-[110px] pt-[0px]">
-          <Image src="logo.svg" alt="Krrid Logo" width={155} height={60}  /> 
+      <nav className="  relative flex items-center justify-between  px-6 py-1 border-b border-gray-100  top-0 z-50 bg-white/70 backdrop-blur-md">
+        <div className=" flex items-center gap-0 ml-[50px] h-[50px] w-[115px]   pt-[0px]">
+          <Image src="logo.svg" alt="Krrid Logo" width={155} height={50} /> 
         </div>
-        <ul className="hidden md:flex gap-8  text-black text-lg font-medium font-poppins">
-          <li className={`transition-colors duration-200 cursor-pointer ${activeSection === "about" ? "text-primary font-bold" : "hover:text-primary"}`}>
+        <div className="nav-mid absolute left-1/2 -translate-x-1/2 ">
+        <ul className="hidden md:flex  flex items-center justify-center gap-8  text-black text-lg font-medium font-poppins">
+          <li className={`transition-colors duration-200 hover:text-white/90 cursor-pointer ${activeSection === "about" ? "text-primary font-bold" : "hover:text-primary"}`}>
             <Link href="/about">About Us</Link>
           </li>
-          <li className={`transition-colors duration-200 cursor-pointer ${activeSection === "courses" ? "text-primary font-bold" : "hover:text-primary"}`}>
+          <li className={`transition-colors duration-200 hover:text-white/90 cursor-pointer ${activeSection === "courses" ? "text-primary font-bold" : "hover:text-primary"}`}>
             <Link href="/courses-curriculum">Courses & Curriculum</Link>
           </li>
-          <li className={`transition-colors duration-200 cursor-pointer ${activeSection === "contact" ? "text-primary font-bold" : "hover:text-primary"}`}>
+          <li className={`transition-colors duration-200 hover:text-black/50 cursor-pointer ${activeSection === "contact" ? "text-primary font-bold" : "hover:text-primary"}`}>
             <Link href="/contact">Contact Us</Link>
           </li>
         </ul>
-        <div className="flex gap-3">
+        </div>
+        <div className="flex gap-3 mr-[50px]">
           <button
             className="bg-black text-white rounded-lg px-5 py-2 font-heading text-base font-semibold transition-transform duration-200 hover:scale-105 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/60"
             onClick={() => setDemoOpen(true)}
@@ -127,8 +126,8 @@ export default function Home() {
           >
             Book a Demo
           </button>
-          {/* Admin Panel button, only for admins and only after loading */}
-          {!loading && user && ADMIN_EMAILS.includes(user.email) && (
+          {/* Admin Panel button, only for admins */}
+          {user && ADMIN_EMAILS.includes(user.email) && (
             <button
               className="bg-gray-600 text-white rounded-lg px-5 py-2 font-medium font-poppins text-base  transition-transform duration-200 hover:scale-105 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400"
               onClick={() => router.push('/admin')}
@@ -206,7 +205,7 @@ export default function Home() {
           <Image src="/chessboard.svg" alt="Chessboard" width={700} height={300} className="rounded-xl shadow-card drop-shadow-[0_0_40px_rgba(37,198,245,0.25)]" />
         </div>
       </section> */}
-      <section id="hero" className="relative flex flex-col items-center text-center py-10 px-4   w-full h-[720]">
+      <section id="hero" className="relative flex flex-col items-center text-center py-8 px-4   w-full h-[700px]">
 
   {/* Background Image */}
   <div className="absolute bottom-0   flex justify-center items-center mt-[0px] ">
@@ -214,13 +213,13 @@ export default function Home() {
       src="/chessboard.svg"
       alt="Chessboard"
       width={1690}
-      height={600}
+      height={580}
       className="object-cover"
     />
   </div>
 
   {/* Foreground Text */}
-  <h1 className="krrid-heading text-5xl md:text-6xl font-bold leading-tight mb-6 z-10">
+  <h1 className="krrid-heading text-5xl md:text-6xl font-bold leading-tight mb-4 z-10">
     Learn through<br />the
     <span className="bg-krrid-highlight"> Krrid</span> way!
   </h1>
@@ -245,78 +244,88 @@ export default function Home() {
 
 
       {/* Turn Pawns Into Queens Section */}
-      <section className="relative bg-white py-20 px-4 flex flex-row items-center justify-center overflow-x-clip min-h-[600px] md:min-h-[700px]">
-        <div className="flex flex-col w-full max-w-5xl mx-auto items-center justify-between gap-0 ">
-        <h2 className="font-heading text-5xl md:text-[80px] font-Inter font-semibold text-center text-[#181f2b] mb-2 leading-[72px] tracking-[-4.28px]">
+      <motion.section
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1 }}
+        
+      >
+      <section className="  py-10 px-4 flex flex-col items-center  overflow-x-clip min-h-[600px] md:min-h-[700px]">
+        <div className="relative z-10 flex mt-[2em]  flex-col w-full max-w-5xl mx-auto items-center justify-center gap-5   ">
+        <h2 className="font-heading text-5xl md:text-[80px] font-Inter font-semibold text-center text-[#181f2b]  leading-[72px] tracking-[-4.28px]">
               Turn Pawns Into 
               <br />Queens With Us!
             </h2>
+            <p className="   text-gray-600 bg-white font-Inter  text-center max-w-lg mb-0 text-lg">Chess sharpens critical thinking, improve focus, and problem solving skills for school and life!</p>
+</div>
           
-        <div className="flex flex-row w-full max-w-5xl  bg-red-500 items-center justify-between gap-0 ">
+        <div className=" absolute    flex flex-row w-full max-w-5xl mt-[8em] py-0 items-center justify-center gap-0 ">
         <img src="/pawn.svg" alt="Pawn" className="hidden md:block h-[510px] w-[250px] object-contain" style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} />
        
         {/* <div className="flex w-full max-w-5xl mx-auto items-center justify-between gap-2 bg-blue-500"> */}
           {/* <img src="/pawn.svg" alt="Pawn" className="hidden md:block h-[700px] w-[250px] object-contain ml-[-40px]" style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} /> */}
           <div className="flex flex flex-col items-center justify-center px-10 ">
             
-            <p className="text-gray-400 text-center max-w-lg mb-6 text-lg">Chess sharpens critical thinking, improve focus, and problem solving skills for school and life!</p>
             <div className="font-heading text-lg font-semibold text-center mb-3 text-[#181f2b]">At Krrid, we make learning fun with:</div>
-            <div className="w-full max-w-xl flex flex-col gap-3 mb-2">
-              <div className="grid grid-cols-4 gap-4">
-                <span className="bg-gradient-to-r from-[#c6f3ff] to-[#7ee8fa] text-[#181f2b] px-4 py-2 rounded-lg font-heading text-base text-center shadow break-words truncate min-w-0 max-w-full flex items-center justify-center">Expert strategies</span>
-                <span className="bg-gradient-to-r from-[#c6f3ff] to-[#7ee8fa] text-[#181f2b] px-4 py-2 rounded-lg font-heading text-base text-center shadow break-words truncate min-w-0 max-w-full flex items-center justify-center">AI & real matches</span>
-                <span className="bg-gradient-to-r from-[#c6f3ff] to-[#7ee8fa] text-[#181f2b] px-4 py-2 rounded-lg font-heading text-base text-center shadow break-words truncate min-w-0 max-w-full flex items-center justify-center">Interactive lessons</span>
-                <span className="bg-gradient-to-r from-[#c6f3ff] to-[#7ee8fa] text-[#181f2b] px-4 py-2 rounded-lg font-heading text-base text-center shadow break-words truncate min-w-0 max-w-full flex items-center justify-center">Tactical puzzles</span>
+            <div className="w-full max-w-xl flex flex-col gap-3 mb-2 items-center justify-center">
+              <div className="grid grid-cols-4 gap-5 w-[42em] h-[2em]">
+                <span className="bg-gradient-to-r from-[#47D4EB]/85 to-[#ffffff]/70   text-[#181f2b] px-4 py-2  font-Inter text-base text-medium text-center  break-words truncate min-w-0 max-w-full flex items-center justify-center">Expert strategies</span>
+                <span className="bg-gradient-to-r from-[#47D4EB]/85 to-[#ffffff]/70   text-[#181f2b] px-4 py-2  font-Inter text-base text-medium text-center  break-words truncate min-w-0 max-w-full flex items-center justify-center">AI & real matches</span>
+                <span className="bg-gradient-to-r from-[#47D4EB]/85 to-[#ffffff]/70   text-[#181f2b] px-4 py-2  font-Inter text-base text-medium text-center  break-words truncate min-w-0 max-w-full flex items-center justify-center">Interactive lessons</span>
+                <span className="bg-gradient-to-r from-[#47D4EB]/85 to-[#ffffff]/70   text-[#181f2b] px-4 py-2  font-Inter text-base text-medium text-center  break-words truncate min-w-0 max-w-full flex items-center justify-center">Tactical puzzles</span>
               </div>
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                <span className="bg-gradient-to-r from-[#c6f3ff] to-[#7ee8fa] text-[#181f2b] px-4 py-2 rounded-lg font-heading text-base text-center shadow break-words truncate min-w-0 max-w-full flex items-center justify-center">Tournaments & leaderboards</span>
-                <span className="bg-gradient-to-r from-[#c6f3ff] to-[#7ee8fa] text-[#181f2b] px-4 py-2 rounded-lg font-heading text-base text-center shadow break-words truncate min-w-0 max-w-full flex items-center justify-center">Tournaments & leaderboards</span>
+              <div className="grid grid-cols-2 gap-2 mt-2  w-[30em] h-[2em]">
+                <span className="bg-gradient-to-r from-[#47D4EB]/85 to-[#ffffff]/70   text-[#181f2b] px-4 py-2  font-Inter text-base text-medium text-center  break-words truncate min-w-0 max-w-full flex items-center justify-center">Tournaments & leaderboards</span>
+                <span className="bg-gradient-to-r from-[#47D4EB]/85 to-[#ffffff]/70   text-[#181f2b] px-4 py-2  font-Inter text-base text-medium text-center  break-words truncate min-w-0 max-w-full flex items-center justify-center">Tournaments & leaderboards</span>
               </div>
             </div>
-            <div className="italic text-gray-400 text-center mt-2 text-sm">With Krrid, kids don't just play, they master, grow, and excel!</div>
+            <div className="font-Inter italic text-[#1D242B] text-center font-medium mt-8 text-base">With Krrid, kids don't just play, they master, grow, and excel!</div>
           </div>
-          <img src="/queen.svg" alt="Queen" className="hidden md:block h-[510px] w-[250px]  object-contain " style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} />
+          <img src="/queen.svg" alt="Queen" className="hidden md:block h-[460px] w-[250px]  object-contain " style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} />
         {/* </div> */}
         </div>
-        </div>
+        
       </section>
+      </motion.section>
 
       {/* Benefits Section */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
-        className="py-16 px-4 bg-white flex flex-col items-center"
+        // viewport={{ once: true }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 1 }}
+        className="py-6 px-4  flex flex-col items-center"
       >
-        <h2 className="font-heading text-4xl md:text-5xl font-bold text-black text-center mb-10">Benefits Of Chess For Kids</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mb-6">
-          <div className="bg-gray-100 rounded-xl shadow-card p-6 flex flex-col items-start">
-            <h3 className="font-heading font-semibold text-lg mb-2">Empowering Strategic Minds:</h3>
-            <p className="text-gray-400 mb-4">Cultivate planning, foresight, and critical decision-making skills that lay the foundation for academic and personal success.</p>
-            <Image src="/benefit-book.png" alt="Book" width={80} height={80} />
+        <h2 className="font-Inter text-4xl md:text-[80px]  font-semibold text-black text-center leading-[77px] tracking-[-2.28px]  mb-10">Benefits Of Chess <br/> For Kids</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full  max-w-6xl mt-10 mb-6">
+          <div className="bg-gradient-to-t from-[#47D4EB]/20 to-[#ffffff]/20 border border-[3px] border-gray-300 rounded-4xl shadow-card p-5 flex flex-col items-start">
+            <h3 className="font-Inter font-semibold text-2xl text-black mb-2">Empowering Strategic Minds:</h3>
+            <p className="text-[#55525B] font-Inter font-regular text-start text-base mb-4">Cultivate planning, foresight, and critical decision-making skills that lay the foundation for academic and personal success.</p>
+            <Image src="/boost.svg" alt="Book" width={396} height={200} />
           </div>
-          <div className="bg-black text-white rounded-xl shadow-card p-6 flex flex-col items-start">
-            <h3 className="font-heading font-semibold text-lg mb-2">Enhancing Social Interaction:</h3>
-            <p className="text-gray-100 mb-4">Promote respectful competition, sportsmanship, and teamwork through interactive, fun chess sessions that connect young minds.</p>
-            <Image src="/benefit-social.png" alt="Social" width={80} height={80} />
+          <div className="bg-gradient-to-b from-[#000000]/90 to-[#55525B]/100 border border-[3px] border-black-300 rounded-4xl shadow-card p-0 flex flex-col items-center">
+            <h3 className="font-Inter pl-6 pr-6 pt-6 pb-0 font-semibold text-2xl text-white mb-2">Enhancing Social Interaction:</h3>
+            <p className="text-[#E1DFE8] pl-6 pr-6 pt-0 pb-0 font-Inter font-regular text-start text-base mb-4">Promote respectful competition, sportsmanship, and teamwork through interactive, fun chess sessions that connect young minds.</p>
+            <Image src="/boost.svg" alt="Social" width={350} height={200} />
           </div>
-          <div className="bg-gray-100 rounded-xl shadow-card p-6 flex flex-col items-start">
-            <h3 className="font-heading font-semibold text-lg mb-2">Boosting Cognitive Abilities:</h3>
-            <p className="text-gray-400 mb-4">Enhance memory, concentration, and problem-solving skill , each move sharpens the mind for smarter learning.</p>
-            <Image src="/benefit-cognitive.png" alt="Cognitive" width={80} height={80} />
+          <div className="bg-gradient-to-t from-[#47D4EB]/20 to-[#ffffff]/20 border border-[3px] border-gray-300 rounded-4xl shadow-card p-0 flex flex-col items-start">
+            <h3 className="font-Inter font-semibold text-2xl text-black mb-2 pl-6 pt-6 pr-6 pb-0">Boosting Cognitive Abilities:</h3>
+            <p className="text-[#55525B] font-Inter font-regular text-start text-base leading-[24px] mb-4 pl-6 pr-6 pb-0">Enhance memory, concentration, and problem-solving skill , each move sharpens the mind for smarter learning.</p>
+            <Image src="/boost.svg" alt="Cognitive" width={450} height={200}  />
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
-          <div className="bg-gray-100 rounded-xl shadow-card p-6 flex flex-col items-start">
-            <h3 className="font-heading font-semibold text-lg mb-2">Interactive & Engaging Experience:</h3>
-            <p className="text-gray-400 mb-4">With Krrid's dynamic platform, learning chess transforms into an immersive journey where every match sparks curiosity, growth, and the joy of discovery.</p>
-            <Image src="/benefit-engage.png" alt="Engage" width={80} height={80} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+          <div className="bg-gradient-to-t from-[#47D4EB]/20 to-[#ffffff]/20 border border-[3px] border-gray-300 rounded-4xl shadow-card p-6 flex flex-col items-start">
+            <h3 className="font-Inter font-semibold text-2xl text-black mb-2">Interactive & Engaging Experience:</h3>
+            <p className="text-[#55525B] font-Inter font-regular text-start text-basemb-4">With Krrid's dynamic platform, learning chess transforms into an immersive journey where every match sparks curiosity, growth, and the joy of discovery.</p>
+            <Image src="/boost.svg" alt="Engage" width={480} height={200} />
           </div>
-          <div className="bg-gray-100 rounded-xl shadow-card p-6 flex flex-col items-start">
-            <h3 className="font-heading font-semibold text-lg mb-2">Fostering Creativity & Innovation:</h3>
-            <p className="text-gray-400 mb-4">Encourage kids to explore diverse strategies, turning challenges into opportunities and everyday moves into bold breakthroughs.</p>
-            <Image src="/benefit-creative.png" alt="Creative" width={80} height={80} />
+          <div className="bg-gradient-to-t from-[#47D4EB]/20 to-[#ffffff]/20 border border-[3px] border-gray-300 rounded-4xl p-6 flex flex-col items-start">
+            <h3 className="font-Inter font-semibold text-2xl text-black mb-2 ">Fostering Creativity & Innovation:</h3>
+            <p className="text-[#55525B] font-Inter font-regular text-start text-base mb-4">Encourage kids to explore diverse strategies, turning challenges into opportunities and everyday moves into bold breakthroughs.</p>
+            <Image src="/innovativatio.svg" alt="Creative" width={400} height={150} />
           </div>
         </div>
       </motion.section>
@@ -326,43 +335,20 @@ export default function Home() {
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
-        className="py-16 px-4 bg-black text-white flex flex-col items-center rounded-t-[3rem] rounded-b-[3rem]"
+        transition={{ duration: 0.5 }}
+        className="py-16 px-4 bg-black text-white flex flex-col ml-1 mr-1 pb-20 items-center rounded-t-[3rem] rounded-b-[3rem]"
       >
-        <h2 className="font-heading text-4xl md:text-5xl font-bold text-center mb-12 z-20">What Our Students Say</h2>
-        <div className="relative w-full max-w-3xl mx-auto flex flex-col items-center">
-          {/* Left quote SVG */}
-          <svg className="absolute left-[-60px] md:left-[-100px] top-1/2 -translate-y-1/2 w-32 h-32 md:w-56 md:h-56 opacity-80 z-0" style={{pointerEvents:'none'}} viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="leftQuoteGradient" x1="0" y1="0" x2="120" y2="0" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#1ecfff"/>
-                <stop offset="1" stopColor="#1ecfff" stopOpacity="0.7"/>
-              </linearGradient>
-            </defs>
-            <path d="M20 100V60C20 30 40 20 60 20V40C50 40 40 50 40 60V100H80V120H20V100Z" fill="url(#leftQuoteGradient)"/>
-            <path d="M60 100V60C60 30 80 20 100 20V40C90 40 80 50 80 60V100H120V120H60V100Z" fill="url(#leftQuoteGradient)"/>
-          </svg>
-          {/* Right quote SVG */}
-          <svg className="absolute right-[-60px] md:right-[-100px] top-1/2 -translate-y-1/2 w-32 h-32 md:w-56 md:h-56 opacity-80 z-0" style={{pointerEvents:'none'}} viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="rightQuoteGradient" x1="120" y1="0" x2="0" y2="0" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#1ecfff"/>
-                <stop offset="1" stopColor="#1ecfff" stopOpacity="0.7"/>
-              </linearGradient>
-            </defs>
-            <path d="M20 100V60C20 30 40 20 60 20V40C50 40 40 50 40 60V100H80V120H20V100Z" fill="url(#rightQuoteGradient)"/>
-            <path d="M60 100V60C60 30 80 20 100 20V40C90 40 80 50 80 60V100H120V120H60V100Z" fill="url(#rightQuoteGradient)"/>
-          </svg>
+        <h2 className="font-Inter text-4xl md:text-[80px] font-bold text-center mb-12 z-20">What Our <br/> Students Say</h2>
+        <div className="relative w-full max-w-3xl mx-auto flex flex-col items-center justify-between">
+          
+          <Image src="/iconl.svg" alt="Quote" width={120} height={120} className="absolute left-[-180px] md:left-[-180px] top-1/2 -translate-y-1/2 w-32 h-32 md:w-56 md:h-56 opacity-80 z-0" />
+          
+         
           <div className="relative z-10 w-full flex flex-col items-center">
-            {/* <TestimonialCarousel /> */}
+            <TestimonialCarousel />
           </div>
-        </div>
-        <div className="flex gap-8 justify-center mt-14 z-10">
-          {[1, 2, 3].map((n) => (
-            <div key={n} className="bg-white rounded-xl w-24 h-24 flex items-center justify-center shadow-lg">
-              <Image src="/yt.svg" alt="YouTube" width={40} height={40} />
-            </div>
-          ))}
+          <Image src="/iconr.svg" alt="Quote" width={120} height={120} className="absolute right-[-180px] md:right-[-180px] top-1/2 -translate-y-1/2 w-32 h-32 md:w-56 md:h-56 opacity-80 z-0" />
+
         </div>
       </motion.section>
 
@@ -376,13 +362,17 @@ export default function Home() {
       >
         <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl">
           <div className="flex-1 flex flex-col gap-4 items-start justify-start">
-            <span className="bg-gray-100 px-3 py-1 rounded-full text-xs font-heading mb-2">FAQs</span>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">Have Questions? We've Got You!</h2>
-            <div className="bg-gray-100 rounded-xl p-4 flex items-center gap-4 mb-2 shadow">
-              <Image src="/coach.png" alt="Coach" width={48} height={48} className="rounded-full" />
-              <span className="font-heading text-sm">Trust The Process, And You'll See Progress In No Time <span className="text-accent">♥</span></span>
+            <div className="flex flex-row gap-2 bg-[#F1F1F1] items-center justify-start  px-2 py-1 rounded-full ">
+              <Image src="/faqicon.svg" alt="FAQ" width={18} height={18} />
+              <span className=" text-xs font-poppins text-black font-medium font-heading ">FAQs</span>
             </div>
-            <p className="text-black text-sm mb-4">Feel free to reach out, we're here to assist you anytime!</p>
+            
+            <h2 className="font-heading font-Inter text-3xl md:text-4xl text-black font-bold mb-2">Have Questions? <br/> We've Got You!</h2>
+            <div className="bg-gray-100 rounded-xl p-4 flex items-center gap-4 mb-2 shadow">
+              <Image src="/handshake.svg" alt="Coach" width={48} height={48} className="rounded-full" />
+              <span className="font-heading font-Inter text-black font-semibold  text-base">Trust The Process, And You'll <br/> See Progress In No Time <span className="text-accent text-red-500">🏆</span></span>
+            </div>
+            <p className="text-black font-Inter font-semibold text-base  mb-4">Feel free to reach out, we're here to assist you anytime!</p>
             <button className="bg-black text-white rounded-lg px-6 py-2 font-heading text-base">Contact Us</button>
           </div>
           <div className="flex-1 flex flex-col gap-4">
@@ -416,27 +406,44 @@ export default function Home() {
       </motion.section>
 
       {/* Footer */}
-      <footer className="bg-black text-white pt-12 pb-0 px-0 rounded-t-[3rem] mt-10 w-full">
-        <div className="flex flex-col md:flex-row justify-between items-center max-w-6xl mx-auto gap-8 px-4">
-          <div className="flex flex-col gap-2 items-start">
+      <footer className="bg-black text-white pt-12 pb-0 px-0 rounded-t-[8rem] mt-1 w-full">
+        <div className="flex  flex-col  md:flex-row justify-between items-center max-w-7xl mx-auto gap-5 px-1">
+          <div className="flex flex-col gap-2 ml-0 items-start mt-2">
             <Image src="/logo.svg" alt="Krrid Logo" width={80} height={40} />
-            <span className="text-sm leading-tight">Shiddhart Vihar, Gaur City 2,<br />Ghaziabad, Uttar Pradesh<br />201009</span>
-            <div className="flex gap-3 mt-2">
+            <span className="text-lg leading-tight mt-4">Shiddhart Vihar, Gaur City 2,<br />Ghaziabad, Uttar Pradesh<br />201009</span>
+            {/* <div className="flex gap-3 mt-2">
               <Image src="/ig.svg" alt="Instagram" width={20} height={20} />
               <Image src="/fb.svg" alt="Facebook" width={20} height={20} />
               <Image src="/x.svg" alt="X" width={20} height={20} />
               <Image src="/yt.svg" alt="YouTube" width={20} height={20} />
-            </div>
+            </div> */}
+            <div className="flex space-x-4 mt-2">
+      <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+        <FaFacebook className="w-6 h-6 text-blue-600" />
+      </a>
+      <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+        <FaInstagram className="w-6 h-6 text-pink-500" />
+      </a>
+      <a href="https://youtube.com" target="_blank" rel="noopener noreferrer">
+        <FaYoutube className="w-6 h-6 text-blue-400" />
+      </a>
+      <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
+        <FaLinkedin className="w-6 h-6 text-blue-700" />
+      </a>
+    </div>
           </div>
-          <div className="flex flex-col gap-2 items-start md:items-end">
-            <span className="font-heading text-lg text-white text-right leading-tight">Have Any Questions?<br />Please Don't Hesitate To Connect With Us -</span>
-            <span className="bg-[#1ecfff] text-black px-3 py-1 rounded font-heading font-semibold text-base tracking-wide">+91 73090 51044</span>
-            <span className="bg-[#1ecfff] text-black px-3 py-1 rounded font-heading font-semibold text-base tracking-wide">Officialkrrid@Gmail.Com</span>
+          <div className="flex  flex-row gap-70 items-start md:items-end">
+            <span className="font-heading text-2xl font-Inter font-semibold text-white text-left  leading-tight">Have Any Questions?<br />Please Don't Hesitate To <br/> Connect With Us -</span>
+           <div className="flex flex-col gap-2 items-start md:items-start">
+           <span className="bg-gradient-to-r from-[#47D4EB]/100 to-[#000000]/100 text-white px-2 py-1  font-heading font-semibold text-base tracking-wide">+91 7309051044</span>
+            <span className="bg-gradient-to-r from-[#47D4EB]/100 to-[#000000]/100 text-white px-2 py-1  font-heading font-semibold text-base tracking-wide">officialkrrid@Gmail.Com</span>
+
+            </div> 
           </div>
         </div>
-        <div className="bg-[#1ecfff] w-full mt-8 py-2 px-0 flex flex-col md:flex-row justify-between items-center max-w-full text-xs text-black font-semibold tracking-wide">
-          <span className="ml-4">Copyright © 2025 Krrid</span>
-          <div className="flex gap-6 mr-4 mt-2 md:mt-0">
+        <div className="bg-[#47D4EB] w-full mt-8 py-2 px-0 flex flex-col md:flex-row justify-between items-center max-w-full text-xs text-black font-semibold tracking-wide">
+          <span className="ml-[8rem] font-Inter font-semibold ">Copyright © 2025 Krrid</span>
+          <div className="flex gap-15 mr-[5rem] mt-2 md:mt-0">
             <span className="hover:underline cursor-pointer">Refund Policy</span>
             <span className="hover:underline cursor-pointer">Terms and Conditions</span>
             <span className="hover:underline cursor-pointer">Privacy Policy</span>
