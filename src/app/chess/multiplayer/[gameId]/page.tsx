@@ -2,7 +2,6 @@
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabaseClient";
 import { useEffect, useState } from "react";
-import ChessboardUI from "@/components/ChessboardUI";
 
 export default function MultiplayerGamePage() {
   const params = useParams();
@@ -13,11 +12,6 @@ export default function MultiplayerGamePage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
   }, []);
-
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    router.push("/auth?asPlayer=true");
-  }
 
   // const { game, makeMove } = useRealtimeChessGame(gameId, userId!);
 

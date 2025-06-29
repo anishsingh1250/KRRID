@@ -7,12 +7,8 @@ import { useRouter } from "next/navigation";
 
 export default function ChessMainPage() {
   const router = useRouter();
-  const { gameState, makeMove, reset, goToPrevious, goToNext } = useChessGame();
-  const [orientation, setOrientation] = useState<'white' | 'black'>('white');
-
-  function handleMove(fen: string, move: any, turn: string) {
-    makeMove(move.from, move.to, move.promotion);
-  }
+  const { gameState } = useChessGame();
+  const [orientation] = useState<'white' | 'black'>('white');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-blue-950 to-black flex flex-col items-center w-full">

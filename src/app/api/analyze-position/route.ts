@@ -3,7 +3,7 @@ import { Chess } from 'chess.js';
 import { spawn } from 'child_process';
 import path from 'path';
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<Response> {
   try {
     const { fen } = await request.json();
     
@@ -12,17 +12,21 @@ export async function POST(request: Request) {
     }
 
     // Validate FEN
-    const chess = new Chess(fen);
-    if (!chess.isValid()) {
+    try {
+      new Chess(fen);
+    } catch {
       return NextResponse.json({ error: 'Invalid FEN string' }, { status: 400 });
     }
 
     // Run Stockfish analysis
     const stockfish = spawn(path.join(process.cwd(), 'bin', 'stockfish'));
     
-    return new Promise((resolve) => {
+    return new Promise<Response>((resolve) => {
       let analysis = '';
-      let timeout: NodeJS.Timeout;
+      const timeout = setTimeout(() => {
+        stockfish.kill();
+        resolve(NextResponse.json({ analysis: 'Analysis timed out' }, { status: 408 }));
+      }, 5000);
 
       stockfish.stdout.on('data', (data) => {
         const output = data.toString();
@@ -35,7 +39,7 @@ export async function POST(request: Request) {
         }
       });
 
-      stockfish.on('error', (error) => {
+      stockfish.on('error', () => {
         clearTimeout(timeout);
         resolve(NextResponse.json({ error: 'Stockfish error' }, { status: 500 }));
       });
@@ -45,15 +49,9 @@ export async function POST(request: Request) {
       stockfish.stdin.write('setoption name MultiPV value 1\n');
       stockfish.stdin.write(`position fen ${fen}\n`);
       stockfish.stdin.write('go depth 20\n');
-
-      // Set timeout
-      timeout = setTimeout(() => {
-        stockfish.kill();
-        resolve(NextResponse.json({ analysis: 'Analysis timed out' }, { status: 408 }));
-      }, 5000);
     });
-  } catch (error) {
-    console.error('Analysis error:', error);
+  } catch {
+    console.error('Analysis error');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 } 

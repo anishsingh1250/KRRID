@@ -1,13 +1,24 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 
 // Optionally import a move sound
 // import moveSound from "@/public/move.mp3";
 
+interface Move {
+  from: string;
+  to: string;
+  promotion?: string;
+}
+
 // Helper to determine if it's the user's turn in multiplayer
-function isPlayersTurn({ userId, player_white, player_black, turn }) {
+function isPlayersTurn({ userId, player_white, player_black, turn }: {
+  userId?: string;
+  player_white?: string;
+  player_black?: string;
+  turn?: string;
+}) {
   if (!userId || !player_white || !player_black || !turn) return false;
   if (turn === "w") return userId === player_white;
   if (turn === "b") return userId === player_black;
@@ -17,8 +28,8 @@ function isPlayersTurn({ userId, player_white, player_black, turn }) {
 type ChessboardUIProps = {
   fen?: string;
   turn?: string;
-  makeMove?: (fen: string, move: any, turn: string) => void;
-  moves?: any[];
+  makeMove?: (fen: string, move: Move, turn: string) => void;
+  moves?: Move[];
   userId?: string;
   player_white?: string;
   player_black?: string;
@@ -26,8 +37,8 @@ type ChessboardUIProps = {
   showAnalysis?: boolean;
   boardWidth?: number;
   boardOrientation?: 'white' | 'black';
-  customLightSquareStyle?: any;
-  customDarkSquareStyle?: any;
+  customLightSquareStyle?: Record<string, string>;
+  customDarkSquareStyle?: Record<string, string>;
   pieceTheme?: string;
 };
 
@@ -49,7 +60,7 @@ export default function ChessboardUI(props: ChessboardUIProps) {
   // }
 
   // Piece theme selection (future: add more sets)
-  let customPieces = undefined;
+  const customPieces = undefined;
   if (props.pieceTheme === 'alpha') {
     // customPieces = ... (future: implement alpha set)
   } else if (props.pieceTheme === 'fantasy') {

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   SkipBack, 
@@ -7,11 +6,9 @@ import {
   Play,
   ChevronLeft,
   ChevronRight,
-  Square,
   Upload,
   Download
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface GameControlsProps {
   onGoToStart: () => void;
@@ -43,88 +40,81 @@ const GameControls: React.FC<GameControlsProps> = ({
   return (
     <div className="flex items-center justify-center gap-1 p-3 bg-white rounded-lg shadow-md">
       {/* Go to start */}
-      <Button
-        variant="outline"
-        size="icon"
+      <button
+        type="button"
+        className="hover:bg-gray-50 transition-colors h-8 w-8"
         onClick={onGoToStart}
         disabled={!canGoBack}
-        className="hover:bg-gray-50 transition-colors h-8 w-8"
         title="Go to start"
       >
         <SkipBack className="w-3 h-3" />
-      </Button>
+      </button>
       
       {/* Previous move */}
-      <Button
-        variant="outline"
-        size="icon"
+      <button
+        type="button"
+        className="hover:bg-gray-50 transition-colors h-8 w-8"
         onClick={onGoToPrevious}
         disabled={!canGoBack}
-        className="hover:bg-gray-50 transition-colors h-8 w-8"
         title="Previous move"
       >
         <ChevronLeft className="w-3 h-3" />
-      </Button>
+      </button>
       
       {/* Play/Pause */}
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={isPlaying ? onPause : onPlay}
+      <button
+        type="button"
         className="hover:bg-gray-50 transition-colors h-8 w-8"
+        onClick={isPlaying ? onPause : onPlay}
         title={isPlaying ? "Pause" : "Play"}
       >
         {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-      </Button>
+      </button>
       
       {/* Next move */}
-      <Button
-        variant="outline"
-        size="icon"
+      <button
+        type="button"
+        className="hover:bg-gray-50 transition-colors h-8 w-8"
         onClick={onGoToNext}
         disabled={!canGoForward}
-        className="hover:bg-gray-50 transition-colors h-8 w-8"
         title="Next move"
       >
         <ChevronRight className="w-3 h-3" />
-      </Button>
+      </button>
       
       {/* Go to end */}
-      <Button
-        variant="outline"
-        size="icon"
+      <button
+        type="button"
+        className="hover:bg-gray-50 transition-colors h-8 w-8"
         onClick={onGoToEnd}
         disabled={!canGoForward}
-        className="hover:bg-gray-50 transition-colors h-8 w-8"
         title="Go to end"
       >
         <SkipForward className="w-3 h-3" />
-      </Button>
+      </button>
 
       {/* Separator */}
       <div className="w-px h-6 bg-gray-300 mx-1" />
 
       {/* Load PGN */}
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={onLoadPgn}
+      <button
+        type="button"
         className="hover:bg-gray-50 transition-colors h-8 w-8"
+        onClick={onLoadPgn}
         title="Import PGN"
       >
         <Upload className="w-3 h-3" />
-      </Button>
+      </button>
 
       {/* Export PGN */}
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={onExportPgn}
+      <button
+        type="button"
         className="hover:bg-gray-50 transition-colors h-8 w-8"
+        onClick={onExportPgn}
         title="Export PGN"
       >
         <Download className="w-3 h-3" />
-      </Button>
+      </button>
     </div>
   );
 };

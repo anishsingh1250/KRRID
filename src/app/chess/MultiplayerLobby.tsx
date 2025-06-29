@@ -10,7 +10,7 @@ export default function MultiplayerLobby({ userId }: { userId: string }) {
   async function createGame() {
     setLoading(true);
     const startingFEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("games")
       .insert([{ player_white: userId, fen: startingFEN }])
       .select()

@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Play, FileText, Plus, Upload } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useSupabaseData, type Chapter, type Lesson } from '@/hooks/useSupabaseData';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
+import type { Lesson } from '@/hooks/useSupabaseData';
 import PgnImportDialog from './PgnImportDialog';
 
 interface LessonSidebarProps {
@@ -18,7 +16,7 @@ const LessonSidebar: React.FC<LessonSidebarProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set(['*']));
   const [showPgnDialog, setShowPgnDialog] = useState(false);
-  const { chapters, lessons, loading, getLessonsByChapter } = useSupabaseData();
+  const { chapters, loading, getLessonsByChapter } = useSupabaseData();
 
   const toggleChapter = (chapterId: string) => {
     const newExpanded = new Set(expandedChapters);
@@ -55,26 +53,22 @@ const LessonSidebar: React.FC<LessonSidebarProps> = ({
       {/* Header */}
       <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="flex gap-2 mb-3">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <button 
             className="flex-1 text-blue-600 hover:text-blue-700"
             onClick={() => setShowPgnDialog(true)}
           >
             <Upload className="w-4 h-4 mr-2" />
             Import PGN
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
+          </button>
+          <button 
             className="text-green-600 hover:text-green-700"
             onClick={() => window.open('/admin', '_blank')}
           >
             <Plus className="w-4 h-4 mr-2" />
             Admin
-          </Button>
+          </button>
         </div>
-        <Input
+        <input
           type="text"
           placeholder="Search lessons..."
           value={searchTerm}

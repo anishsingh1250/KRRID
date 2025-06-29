@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const stockfishPath = path.join(process.cwd(), 'bin', 'stockfish.exe.exe');
   const stockfish = spawn(stockfishPath);
   let bestMove: { from: string; to: string; promotion?: string } | null = null;
-  let multiPV: string[] = [];
+  const multiPV: string[] = [];
 
   // Pronounced depth scaling
   let depth = 8;

@@ -2,6 +2,32 @@
 import { useEffect, useState } from "react";
 import { supabaseAdmin as supabase } from "@/utils/supabaseClient";
 
+interface User {
+  email?: string;
+  id: string;
+}
+
+interface Chapter {
+  id: string;
+  title: string;
+  description: string;
+  position: number;
+}
+
+interface Lesson {
+  id: string;
+  title: string;
+  description: string;
+  position: number;
+  chapter: string;
+  white: string;
+  black: string;
+  result: string;
+  date: string;
+  pgn: string;
+  fen: string;
+}
+
 const ADMIN_EMAILS = [
   "anishsingh1250@gmail.com",
   "vineetsingh05082005@gmail.com",
@@ -9,15 +35,15 @@ const ADMIN_EMAILS = [
 ];
 
 export default function AdminPage() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'chapters' | 'lessons'>("chapters");
-  const [chapters, setChapters] = useState<any[]>([]);
-  const [lessons, setLessons] = useState<any[]>([]);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
   const [chapterForm, setChapterForm] = useState({ title: "", description: "", position: 1 });
   const [lessonForm, setLessonForm] = useState({ chapter: "", title: "", description: "", position: 1, white: "", black: "", result: "", date: "", pgn: "", fen: "" });
-  const [editingChapter, setEditingChapter] = useState<any>(null);
-  const [editingLesson, setEditingLesson] = useState<any>(null);
+  const [editingChapter, setEditingChapter] = useState<Chapter | null>(null);
+  const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -32,14 +58,14 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (user && ADMIN_EMAILS.includes(user.email)) {
+    if (user && user.email && ADMIN_EMAILS.includes(user.email)) {
       fetchChapters();
       fetchLessons();
     }
   }, [user]);
 
   useEffect(() => {
-    if (user && !ADMIN_EMAILS.includes(user.email)) {
+    if (user && user.email && !ADMIN_EMAILS.includes(user.email)) {
       setUnauthorized(true);
       supabase.auth.signOut().then(() => {
         window.location.reload();
@@ -56,7 +82,7 @@ export default function AdminPage() {
     if (!error) setLessons(data || []);
   }
 
-  async function handleChapterSave(e: any) {
+  async function handleChapterSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     if (!chapterForm.title) { setError("Title required"); return; }
@@ -69,7 +95,7 @@ export default function AdminPage() {
     setChapterForm({ title: "", description: "", position: 1 });
     fetchChapters();
   }
-  async function handleLessonSave(e: any) {
+  async function handleLessonSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     if (!lessonForm.title || !lessonForm.chapter) { setError("Title and chapter required"); return; }

@@ -1,14 +1,9 @@
-
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect, useCallback } from 'react';
 import GameControls from './GameControls';
 import PgnImportDialog from './PgnImportDialog';
 import { useChessGame } from '@/hooks/useChessGame';
 import { type Lesson } from '@/hooks/useSupabaseData';
 import { Download, Settings, Calendar, Users, Trophy } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 interface LessonContentProps {
   lesson: Lesson | null;
@@ -18,7 +13,6 @@ const LessonContent: React.FC<LessonContentProps> = ({ lesson }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [autoPlayInterval, setAutoPlayInterval] = useState<NodeJS.Timeout | null>(null);
   const [showPgnDialog, setShowPgnDialog] = useState(false);
-  const { toast } = useToast();
   
   const {
     gameState,
@@ -27,8 +21,7 @@ const LessonContent: React.FC<LessonContentProps> = ({ lesson }) => {
     goToNext,
     goToEnd,
     loadPgn,
-    getPgn,
-    reset
+    getPgn
   } = useChessGame(lesson?.pgn, lesson?.fen);
 
   const handlePlay = () => {
@@ -47,20 +40,20 @@ const LessonContent: React.FC<LessonContentProps> = ({ lesson }) => {
     }
   };
 
-  const handlePause = () => {
+  const handlePause = useCallback(() => {
     setIsPlaying(false);
     if (autoPlayInterval) {
       clearInterval(autoPlayInterval);
       setAutoPlayInterval(null);
     }
-  };
+  }, [autoPlayInterval]);
 
   // Stop autoplay when reaching the end
   useEffect(() => {
     if (isPlaying && gameState.currentMoveIndex >= gameState.history.length - 1) {
       handlePause();
     }
-  }, [gameState.currentMoveIndex, gameState.history.length, isPlaying]);
+  }, [gameState.currentMoveIndex, gameState.history.length, isPlaying, handlePause]);
 
   // Cleanup interval on unmount
   useEffect(() => {
@@ -79,25 +72,14 @@ const LessonContent: React.FC<LessonContentProps> = ({ lesson }) => {
     try {
       const success = loadPgn(pgn);
       if (success) {
-        toast({
-          title: "PGN Imported Successfully",
-          description: "The PGN has been loaded and you can now navigate through the moves.",
-        });
+        alert("PGN Imported Successfully");
         console.log('PGN successfully loaded:', pgn);
       } else {
-        toast({
-          title: "Import Failed",
-          description: "Invalid PGN format. Please check your PGN and try again.",
-          variant: "destructive",
-        });
+        alert("Import Failed");
       }
     } catch (error) {
       console.error('PGN import error:', error);
-      toast({
-        title: "Import Error",
-        description: "An error occurred while importing the PGN. Please try again.",
-        variant: "destructive",
-      });
+      alert("Import Error");
     }
   };
 
@@ -115,24 +97,13 @@ const LessonContent: React.FC<LessonContentProps> = ({ lesson }) => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         
-        toast({
-          title: "PGN Exported",
-          description: "The PGN file has been downloaded successfully.",
-        });
+        alert("PGN Exported");
       } else {
-        toast({
-          title: "Export Failed",
-          description: "No game data available to export.",
-          variant: "destructive",
-        });
+        alert("Export Failed");
       }
     } catch (error) {
       console.error('Export error:', error);
-      toast({
-        title: "Export Error",
-        description: "An error occurred while exporting the PGN.",
-        variant: "destructive",
-      });
+      alert("Export Error");
     }
   };
 
@@ -154,27 +125,25 @@ const LessonContent: React.FC<LessonContentProps> = ({ lesson }) => {
   if (!lesson) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-        <Card className="w-96 text-center">
-          <CardContent className="p-8">
-            <div className="mb-4">
-              <Settings className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">
-              Select a lesson to begin
-            </h3>
-            <p className="text-gray-500 mb-4">
-              Choose a lesson from the sidebar to start learning chess
-            </p>
-            <Button 
-              variant="outline" 
-              onClick={() => window.open('/admin', '_blank')}
-              className="w-full"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Go to Admin Panel
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="w-96 text-center">
+          <div className="mb-4">
+            <Settings className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-600 mb-2">
+            Select a lesson to begin
+          </h3>
+          <p className="text-gray-500 mb-4">
+            Choose a lesson from the sidebar to start learning chess
+          </p>
+          <button 
+            type="button" 
+            onClick={() => window.open('/admin', '_blank')}
+            className="w-full"
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            Go to Admin Panel
+          </button>
+        </div>
       </div>
     );
   }
@@ -184,38 +153,36 @@ const LessonContent: React.FC<LessonContentProps> = ({ lesson }) => {
       {/* Header */}
       <div className="p-6 border-b border-gray-200 bg-white shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <Button 
-            variant="ghost" 
+          <button 
+            type="button" 
             className="text-gray-600 hover:text-gray-800"
             onClick={() => window.history.back()}
           >
             ← Back
-          </Button>
+          </button>
           <div className="flex items-center gap-2">
-            <Badge variant="secondary">
-              <Trophy className="w-3 h-3 mr-1" />
+            <span className="text-sm font-medium text-gray-600">
               Lesson
-            </Badge>
+            </span>
           </div>
         </div>
 
-        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-          <CardHeader className="pb-3">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+          <div className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl text-gray-800">{lesson.title}</CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
+              <h1 className="text-xl text-gray-800">{lesson.title}</h1>
+              <button
+                type="button"
                 onClick={handleExportPgn}
                 className="text-blue-600 hover:text-blue-700"
               >
                 <Download className="w-4 h-4 mr-2" />
                 Export PGN
-              </Button>
+              </button>
             </div>
-          </CardHeader>
+          </div>
           
-          <CardContent className="space-y-4">
+          <div className="space-y-4">
             {/* Game Info */}
             <div className="flex items-center gap-6 text-sm text-gray-600">
               {lesson.date_played && (
@@ -274,58 +241,48 @@ const LessonContent: React.FC<LessonContentProps> = ({ lesson }) => {
                 </span>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Content Area */}
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="max-w-4xl mx-auto space-y-6">
           {lesson.description && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Lesson Description</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 leading-relaxed">
-                  {lesson.description}
-                </p>
-              </CardContent>
-            </Card>
+            <div>
+              <h2 className="text-lg">Lesson Description</h2>
+              <p className="text-gray-600 leading-relaxed">
+                {lesson.description}
+              </p>
+            </div>
           )}
 
           {/* Move History */}
           {gameState.history.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Move History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-gray-50 rounded-lg p-4 max-h-40 overflow-y-auto">
-                  <div className="grid grid-cols-8 gap-1 text-sm font-mono">
-                    {gameState.history.map((move, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleMoveClick(index)}
-                        className={`text-left p-2 rounded hover:bg-gray-200 transition-colors ${
-                          index === gameState.currentMoveIndex ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700'
-                        }`}
-                      >
-                        {Math.floor(index / 2) + 1}{index % 2 === 0 ? '.' : '...'} {move}
-                      </button>
-                    ))}
-                  </div>
+            <div>
+              <h2 className="text-lg">Move History</h2>
+              <div className="bg-gray-50 rounded-lg p-4 max-h-40 overflow-y-auto">
+                <div className="grid grid-cols-8 gap-1 text-sm font-mono">
+                  {gameState.history.map((move, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleMoveClick(index)}
+                      className={`text-left p-2 rounded hover:bg-gray-200 transition-colors ${
+                        index === gameState.currentMoveIndex ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700'
+                      }`}
+                    >
+                      {Math.floor(index / 2) + 1}{index % 2 === 0 ? '.' : '...'} {move}
+                    </button>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* Technical Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Technical Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
+          <div>
+            <h2 className="text-lg">Technical Information</h2>
+            <div className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="font-medium text-gray-700">Position:</span>
@@ -378,8 +335,8 @@ const LessonContent: React.FC<LessonContentProps> = ({ lesson }) => {
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
 

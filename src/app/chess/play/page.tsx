@@ -3,11 +3,17 @@ import { useState } from "react";
 import ChessboardUI from "@/components/ChessboardUI";
 import { useChessGame } from "@/hooks/useChessGame";
 
+interface Move {
+  from: string;
+  to: string;
+  promotion?: string;
+}
+
 export default function PlayChessPage() {
   const { gameState, makeMove, reset, goToPrevious, goToNext } = useChessGame();
   const [orientation, setOrientation] = useState<'white' | 'black'>('white');
 
-  function handleMove(fen: string, move: any, turn: string) {
+  function handleMove(fen: string, move: Move) {
     // move.from and move.to are available
     makeMove(move.from, move.to, move.promotion);
   }

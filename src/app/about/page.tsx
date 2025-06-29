@@ -19,7 +19,7 @@ export default function AboutPage() {
           <li className="bg-blue-50 rounded-lg p-4 text-blue-900 font-semibold shadow">Tournaments & leaderboards</li>
           <li className="bg-blue-50 rounded-lg p-4 text-blue-900 font-semibold shadow">Expert strategies</li>
         </ul>
-        <p className="text-lg text-blue-700 font-bold text-center">With Krrid, kids don't just play, they master, grow, and excel!</p>
+        <p className="text-lg text-blue-700 font-bold text-center">With Krrid, kids don&apos;t just play, they master, grow, and excel!</p>
       </section>
     </main>
   );

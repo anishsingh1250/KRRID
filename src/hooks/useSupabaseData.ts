@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/utils/supabaseClient';
 
 export interface Chapter {
   id: string;
@@ -91,7 +90,7 @@ export const useSupabaseData = () => {
       const newChapters: Array<{
         title: string;
         description: string;
-        difficulty: 'beginner' | 'intermediate' | 'advanced';
+        difficulty: string;
         position: number;
       }> = [
         { title: 'Openings', description: 'Learn fundamental chess openings', difficulty: 'intermediate', position: 4 },

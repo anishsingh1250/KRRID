@@ -1,12 +1,4 @@
-
-import React, { useState, useCallback } from 'react';
-
-interface Square {
-  file: string;
-  rank: number;
-  piece?: ChessPiece;
-  isLight: boolean;
-}
+import React, { useState, useCallback, useMemo } from 'react';
 
 interface ChessPiece {
   type: 'king' | 'queen' | 'rook' | 'bishop' | 'knight' | 'pawn';
@@ -27,7 +19,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
   highlightSquares = [],
   orientation = 'white' 
 }) => {
-  const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+  const files = useMemo(() => ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'], []);
   const ranks = orientation === 'white' ? [8, 7, 6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6, 7, 8];
   
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
@@ -73,7 +65,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     });
 
     return pieces;
-  }, []);
+  }, [files]);
 
   const pieces = parsePosition(position);
 
@@ -87,7 +79,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
       if (selectedSquare === square) {
         setSelectedSquare(null);
       } else {
-        const success = onMove?.(selectedSquare, square);
+        onMove?.(selectedSquare, square);
         setSelectedSquare(null);
       }
     } else if (pieces[square]) {

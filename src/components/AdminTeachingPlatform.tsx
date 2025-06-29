@@ -4,16 +4,41 @@ import { Chess } from "chess.js";
 import { supabaseAdmin as supabase } from "@/utils/supabaseClient";
 import ChessboardUI from "./ChessboardUI";
 
+interface Chapter {
+  id: string;
+  title: string;
+  position: number;
+  difficulty: string;
+}
+
+interface Lesson {
+  id: string;
+  title: string;
+  chapter: string;
+  position: number;
+  pgn?: string;
+  fen?: string;
+}
+
+interface Position {
+  id: string;
+  label: string;
+  description: string;
+  lesson: string;
+  position: number;
+  fen?: string;
+  pgn?: string;
+}
+
 export default function AdminTeachingPlatform() {
   // State for chapters, lessons, positions
-  const [chapters, setChapters] = useState<any[]>([]);
-  const [lessons, setLessons] = useState<any[]>([]);
-  const [positions, setPositions] = useState<any[]>([]);
-  const [selectedChapter, setSelectedChapter] = useState<any>(null);
-  const [selectedLesson, setSelectedLesson] = useState<any>(null);
-  const [selectedPosition, setSelectedPosition] = useState<any>(null);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [positions, setPositions] = useState<Position[]>([]);
+  const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
 
   // Chessboard state
   const [fen, setFen] = useState("start");
@@ -27,42 +52,36 @@ export default function AdminTeachingPlatform() {
     fetchChapters();
   }, []);
   async function fetchChapters() {
-    setLoading(true);
-    const { data, error } = await supabase.from("chapters").select("*").order("position");
+    const { data } = await supabase.from("chapters").select("*").order("position");
     setChapters(data || []);
-    setLoading(false);
   }
   async function fetchLessons(chapterId: string) {
-    setLoading(true);
-    const { data, error } = await supabase.from("lessons").select("*").eq("chapter", chapterId).order("position");
+    const { data } = await supabase.from("lessons").select("*").eq("chapter", chapterId).order("position");
     setLessons(data || []);
-    setLoading(false);
   }
   async function fetchPositions(lessonId: string) {
-    setLoading(true);
-    const { data, error } = await supabase.from("positions").select("*").eq("lesson", lessonId).order("position");
+    const { data } = await supabase.from("positions").select("*").eq("lesson", lessonId).order("position");
     setPositions(data || []);
-    setLoading(false);
   }
 
   // Handlers for selecting tree items
-  function handleSelectChapter(ch: any) {
+  function handleSelectChapter(ch: Chapter) {
     setSelectedChapter(ch);
     setSelectedLesson(null);
     setSelectedPosition(null);
     fetchLessons(ch.id);
   }
-  function handleSelectLesson(ls: any) {
+  function handleSelectLesson(ls: Lesson) {
     setSelectedLesson(ls);
     setSelectedPosition(null);
     fetchPositions(ls.id);
   }
-  function handleSelectPosition(pos: any) {
+  function handleSelectPosition(pos: Position) {
     setSelectedPosition(pos);
     setFen(pos.fen || "start");
     setPgn(pos.pgn || "");
     setMoveIdx(0);
-    setMoves(pos.pgn ? pos.pgn.split(/\s+/).filter(m => m && !/\d+\./.test(m)) : []);
+    setMoves(pos.pgn ? pos.pgn.split(/\s+/).filter((m: string) => m && !/\d+\./.test(m)) : []);
     setStatus("");
   }
 

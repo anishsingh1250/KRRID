@@ -1,35 +1,29 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/utils/supabaseClient";
-import MultiplayerLobby from "../MultiplayerLobby";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import ChessboardUI from "@/components/ChessboardUI";
 import { FaUser, FaCog, FaPlay, FaUserFriends, FaHistory, FaPlus } from "react-icons/fa";
 
-const GAME_MODES = [
-  { label: "10 min (Rapid)", value: "10min" },
-  { label: "5 min (Blitz)", value: "5min" },
-  { label: "3 min (Blitz)", value: "3min" },
-  { label: "1 min (Bullet)", value: "1min" },
-];
+interface User {
+  id: string;
+  email?: string;
+}
 
 export default function ChessMultiplayerPage() {
-  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const [gameMode, setGameMode] = useState("10min");
   const [gameStarted, setGameStarted] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showFriendModal, setShowFriendModal] = useState(false);
   const [friendStep, setFriendStep] = useState<'menu' | 'create' | 'join' | 'created' | 'joining'>('menu');
   const [gameCode, setGameCode] = useState("");
   const [inputCode, setInputCode] = useState("");
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   // Placeholder for chessboard state
   const [fen, setFen] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-  const [orientation, setOrientation] = useState<'white' | 'black'>('white');
+  const [orientation] = useState<'white' | 'black'>('white');
 
   // Timer logic
   const DEFAULT_TIME = 10 * 60; // 10 minutes in seconds
@@ -41,7 +35,6 @@ export default function ChessMultiplayerPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      setUserId(data.user?.id ?? null);
       setUser(data.user);
       setLoading(false);
     });
@@ -72,16 +65,6 @@ export default function ChessMultiplayerPage() {
       if (timerRef.current) clearInterval(timerRef.current);
     }
   }, [whiteTime, blackTime]);
-
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    router.push("/auth?asPlayer=true");
-  }
-
-  function handleStartGame() {
-    setGameStarted(true);
-    setGameOver(false);
-  }
 
   function handlePlayFriend() {
     if (!user) setShowLogin(true);
@@ -130,7 +113,7 @@ export default function ChessMultiplayerPage() {
   }
 
   // On move, switch active color
-  function handleMove(fenAfter, move) {
+  function handleMove(fenAfter: string) {
     setFen(fenAfter);
     setActiveColor(c => (c === 'white' ? 'black' : 'white'));
   }
@@ -276,7 +259,7 @@ export default function ChessMultiplayerPage() {
             )}
             {friendStep === 'join' && (
               <>
-                <h2 className="text-xl font-bold mb-2 text-blue-700">Enter your friend's code:</h2>
+                <h2 className="text-xl font-bold mb-2 text-blue-700">Enter your friend&apos;s code:</h2>
                 <input
                   className="w-full rounded-lg border border-blue-300 px-4 py-2 mb-4 text-lg"
                   value={inputCode}

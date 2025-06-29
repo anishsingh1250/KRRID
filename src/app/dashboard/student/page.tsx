@@ -2,11 +2,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabaseClient";
-import { FiLogOut, FiUser, FiBarChart2, FiBookOpen, FiCalendar, FiAward, FiPieChart, FiTarget, FiList, FiClock } from "react-icons/fi";
+import { FiLogOut, FiUser, FiBarChart2, FiBookOpen, FiCalendar, FiAward, FiPieChart, FiTarget } from "react-icons/fi";
+
+interface User {
+  email?: string;
+  user_metadata?: {
+    name?: string;
+  };
+}
 
 export default function StudentDashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) router.push("/auth");
@@ -51,7 +58,7 @@ export default function StudentDashboard() {
     { name: "Emma K.", xp: 845 },
     { name: "Michael T.", xp: 792 },
     { name: "Sarah L.", xp: 764 },
-    { name: user.email.split("@")[0] + " (You)", xp: 270 },
+    { name: user.email?.split("@")[0] + " (You)" || "", xp: 270 },
     { name: "James W.", xp: 265 },
   ];
   const schedule = [
@@ -60,7 +67,7 @@ export default function StudentDashboard() {
   ];
 
   // Extract user's name from metadata, fallback to email
-  const userName = user.user_metadata?.name || user.email.split("@")[0].replace(/\d+$/, "");
+  const userName = user.user_metadata?.name || user.email?.split("@")[0].replace(/\d+$/, "") || "";
 
   // Sidebar links
   const sidebarLinks = [
@@ -132,7 +139,7 @@ export default function StudentDashboard() {
           </div>
           <div className="bg-gradient-to-r from-[#1976d2] to-[#2196f3] rounded-2xl shadow-lg p-8 flex flex-col md:flex-row md:items-center md:justify-between relative">
             <div>
-              <h2 className="text-2xl md:text-3xl font-heading font-bold text-white mb-2">Master the Queen's Gambit</h2>
+              <h2 className="text-2xl md:text-3xl font-heading font-bold text-white mb-2">Master the Queen&apos;s Gambit</h2>
               <p className="text-white text-lg mb-4">Complete the course to earn 500 XP</p>
             </div>
             <button

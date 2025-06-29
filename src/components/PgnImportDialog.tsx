@@ -1,11 +1,5 @@
-
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Upload, FileText, AlertCircle, Check } from 'lucide-react';
+import { FileText, AlertCircle, Check, Upload } from 'lucide-react';
 
 interface PgnImportDialogProps {
   open: boolean;
@@ -126,21 +120,19 @@ const PgnImportDialog: React.FC<PgnImportDialogProps> = ({
 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Bb7 10. d4 Re8`;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Import PGN
-          </DialogTitle>
-        </DialogHeader>
+    <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center ${open ? '' : 'hidden'}`}>
+      <div className="bg-white p-8 rounded-lg max-w-[600px] max-h-[80vh] overflow-y-auto">
+        <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+          <FileText className="w-5 h-5" />
+          Import PGN
+        </h2>
         
         <div className="space-y-6">
           {/* File Upload Section */}
           <div className="space-y-2">
-            <Label htmlFor="pgn-file" className="text-sm font-medium">Upload PGN File</Label>
+            <label htmlFor="pgn-file" className="text-sm font-medium">Upload PGN File</label>
             <div className="flex items-center gap-3">
-              <Input
+              <input
                 id="pgn-file"
                 type="file"
                 accept=".pgn,.txt"
@@ -164,7 +156,7 @@ const PgnImportDialog: React.FC<PgnImportDialogProps> = ({
           
           {/* Text Input Section */}
           <div className="space-y-2">
-            <Label htmlFor="pgn-text" className="text-sm font-medium flex items-center gap-2">
+            <label htmlFor="pgn-text" className="text-sm font-medium flex items-center gap-2">
               Paste PGN Text
               {isValidPgn && (
                 <span className="text-green-600 flex items-center gap-1 text-xs">
@@ -172,8 +164,8 @@ const PgnImportDialog: React.FC<PgnImportDialogProps> = ({
                   Valid PGN
                 </span>
               )}
-            </Label>
-            <Textarea
+            </label>
+            <textarea
               id="pgn-text"
               value={pgnText}
               onChange={handleTextChange}
@@ -200,36 +192,40 @@ const PgnImportDialog: React.FC<PgnImportDialogProps> = ({
 
           {/* Sample Button */}
           {!pgnText && (
-            <Button
-              variant="outline"
-              size="sm"
+            <button
+              type="button"
+              className="hover:bg-gray-50 transition-colors px-4 py-2 w-full"
               onClick={() => {
                 setPgnText(samplePgn);
                 setIsValidPgn(true);
                 setError('');
               }}
-              className="w-full"
             >
               Load Sample PGN
-            </Button>
+            </button>
           )}
         </div>
 
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={handleClose}>
+        <div className="mt-6 flex justify-end gap-2">
+          <button
+            type="button"
+            className="hover:bg-gray-50 transition-colors px-4 py-2"
+            onClick={handleClose}
+          >
             Cancel
-          </Button>
-          <Button 
+          </button>
+          <button
+            type="button"
+            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-4 py-2"
             onClick={handleImport}
             disabled={!pgnText.trim() || !isValidPgn}
-            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
           >
             <Upload className="w-4 h-4 mr-2" />
             Import PGN
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

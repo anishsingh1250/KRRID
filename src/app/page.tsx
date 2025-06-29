@@ -1,16 +1,21 @@
 'use client';
-import { useState, useEffect, useRef, RefObject, ChangeEvent, FormEvent } from "react";
-import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin, FaYoutube } from 'react-icons/fa';
+import { useState, useEffect, useRef, ChangeEvent, FormEvent } from "react";
+import { FaFacebook, FaInstagram, FaLinkedin, FaYoutube } from 'react-icons/fa';
 import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabaseClient";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
 
+interface User {
+  email?: string;
+  id: string;
+}
+
 export default function Home() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("hero");
   const aboutRef = useRef(null);
@@ -57,7 +62,7 @@ export default function Home() {
   ];
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    supabase.auth.getUser().then(({ data }) => setUser(data.user as User));
     const timer = setTimeout(() => setLoading(false), 2000);
     // Scroll listener for active section
     const handleScroll = () => {
@@ -82,12 +87,6 @@ export default function Home() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
-  const scrollToSection = (ref: RefObject<any>) => {
-    if (ref.current) {
-      (ref.current as HTMLElement).scrollIntoView({ behavior: "smooth" });
-    }
-  };
 
   if (loading) {
     return (
@@ -127,7 +126,7 @@ export default function Home() {
             Book a Demo
           </button>
           {/* Admin Panel button, only for admins */}
-          {user && ADMIN_EMAILS.includes(user.email) && (
+          {user && user.email && ADMIN_EMAILS.includes(user.email) && (
             <button
               className="bg-gray-600 text-white rounded-lg px-5 py-2 font-medium font-poppins text-base  transition-transform duration-200 hover:scale-105 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400"
               onClick={() => router.push('/admin')}
@@ -261,7 +260,7 @@ export default function Home() {
 </div>
           
         <div className=" absolute    flex flex-row w-full max-w-5xl mt-[8em] py-0 items-center justify-center gap-0 ">
-        <img src="/pawn.svg" alt="Pawn" className="hidden md:block h-[510px] w-[250px] object-contain" style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} />
+        <Image src="/pawn.svg" alt="Pawn" width={250} height={510} className="hidden md:block h-[510px] w-[250px] object-contain" style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} />
        
         {/* <div className="flex w-full max-w-5xl mx-auto items-center justify-between gap-2 bg-blue-500"> */}
           {/* <img src="/pawn.svg" alt="Pawn" className="hidden md:block h-[700px] w-[250px] object-contain ml-[-40px]" style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} /> */}
@@ -280,9 +279,9 @@ export default function Home() {
                 <span className="bg-gradient-to-r from-[#47D4EB]/85 to-[#ffffff]/70   text-[#181f2b] px-4 py-2  font-Inter text-base text-medium text-center  break-words truncate min-w-0 max-w-full flex items-center justify-center">Tournaments & leaderboards</span>
               </div>
             </div>
-            <div className="font-Inter italic text-[#1D242B] text-center font-medium mt-8 text-base">With Krrid, kids don't just play, they master, grow, and excel!</div>
+            <div className="font-Inter italic text-[#1D242B] text-center font-medium mt-8 text-base">With Krrid, kids don&apos;t just play, they master, grow, and excel!</div>
           </div>
-          <img src="/queen.svg" alt="Queen" className="hidden md:block h-[460px] w-[250px]  object-contain " style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} />
+          <Image src="/queen.svg" alt="Queen" width={250} height={460} className="hidden md:block h-[460px] w-[250px]  object-contain " style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} />
         {/* </div> */}
         </div>
         
@@ -319,7 +318,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
           <div className="bg-gradient-to-t from-[#47D4EB]/20 to-[#ffffff]/20 border border-[3px] border-gray-300 rounded-4xl shadow-card p-6 flex flex-col items-start">
             <h3 className="font-Inter font-semibold text-2xl text-black mb-2">Interactive & Engaging Experience:</h3>
-            <p className="text-[#55525B] font-Inter font-regular text-start text-basemb-4">With Krrid's dynamic platform, learning chess transforms into an immersive journey where every match sparks curiosity, growth, and the joy of discovery.</p>
+            <p className="text-[#55525B] font-Inter font-regular text-start text-basemb-4">With Krrid&apos;s dynamic platform, learning chess transforms into an immersive journey where every match sparks curiosity, growth, and the joy of discovery.</p>
             <Image src="/boost.svg" alt="Engage" width={480} height={200} />
           </div>
           <div className="bg-gradient-to-t from-[#47D4EB]/20 to-[#ffffff]/20 border border-[3px] border-gray-300 rounded-4xl p-6 flex flex-col items-start">
@@ -367,12 +366,12 @@ export default function Home() {
               <span className=" text-xs font-poppins text-black font-medium font-heading ">FAQs</span>
             </div>
             
-            <h2 className="font-heading font-Inter text-3xl md:text-4xl text-black font-bold mb-2">Have Questions? <br/> We've Got You!</h2>
+            <h2 className="font-heading font-Inter text-3xl md:text-4xl text-black font-bold mb-2">Have Questions? <br/> We&apos;ve Got You!</h2>
             <div className="bg-gray-100 rounded-xl p-4 flex items-center gap-4 mb-2 shadow">
               <Image src="/handshake.svg" alt="Coach" width={48} height={48} className="rounded-full" />
-              <span className="font-heading font-Inter text-black font-semibold  text-base">Trust The Process, And You'll <br/> See Progress In No Time <span className="text-accent text-red-500">🏆</span></span>
+              <span className="font-heading font-Inter text-black font-semibold  text-base">Trust The Process, And You&apos;ll <br/> See Progress In No Time <span className="text-accent text-red-500">🏆</span></span>
             </div>
-            <p className="text-black font-Inter font-semibold text-base  mb-4">Feel free to reach out, we're here to assist you anytime!</p>
+            <p className="text-black font-Inter font-semibold text-base  mb-4">Feel free to reach out, we&apos;re here to assist you anytime!</p>
             <button className="bg-black text-white rounded-lg px-6 py-2 font-heading text-base">Contact Us</button>
           </div>
           <div className="flex-1 flex flex-col gap-4">
@@ -433,7 +432,7 @@ export default function Home() {
     </div>
           </div>
           <div className="flex  flex-row gap-70 items-start md:items-end">
-            <span className="font-heading text-2xl font-Inter font-semibold text-white text-left  leading-tight">Have Any Questions?<br />Please Don't Hesitate To <br/> Connect With Us -</span>
+            <span className="font-heading text-2xl font-Inter font-semibold text-white text-left  leading-tight">Have Any Questions?<br />Please Don&apos;t Hesitate To <br/> Connect With Us -</span>
            <div className="flex flex-col gap-2 items-start md:items-start">
            <span className="bg-gradient-to-r from-[#47D4EB]/100 to-[#000000]/100 text-white px-2 py-1  font-heading font-semibold text-base tracking-wide">+91 7309051044</span>
             <span className="bg-gradient-to-r from-[#47D4EB]/100 to-[#000000]/100 text-white px-2 py-1  font-heading font-semibold text-base tracking-wide">officialkrrid@Gmail.Com</span>
@@ -450,33 +449,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </div>
-  );
-}
-
-function ParallaxChessPieces() {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  // Parallax: pawn moves less, queen moves more
-  const pawnY = useTransform(scrollYProgress, [0, 1], [0, 40]);
-  const queenY = useTransform(scrollYProgress, [0, 1], [0, 80]);
-
-  return (
-    <div ref={ref} className="flex justify-between w-full max-w-4xl">
-      <motion.div
-        style={{ y: pawnY }}
-        animate={{ y: [0, -20, 0, 20, 0] }}
-        transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-      >
-        <Image src="/pawn.png" alt="Pawn" width={120} height={180} />
-      </motion.div>
-      <motion.div
-        style={{ y: queenY }}
-        animate={{ y: [0, -30, 0, 30, 0] }}
-        transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut", delay: 0.5 }}
-      >
-        <Image src="/queen.png" alt="Queen" width={120} height={180} />
-      </motion.div>
     </div>
   );
 }

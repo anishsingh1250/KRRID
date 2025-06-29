@@ -19,6 +19,12 @@ const PUZZLES = [
   }
 ];
 
+interface Move {
+  from: string;
+  to: string;
+  piece?: string;
+}
+
 export default function ChessPuzzle() {
   const [puzzleIdx, setPuzzleIdx] = useState(0);
   const [moveIdx, setMoveIdx] = useState(0);
@@ -68,9 +74,9 @@ export default function ChessPuzzle() {
       <div className="mb-2 text-lg font-semibold text-primary">Puzzle {puzzleIdx + 1} of {PUZZLES.length}</div>
       <ChessboardUI
         fen={fen}
-        makeMove={(fen, move) => {
+        makeMove={(fen, move: Move) => {
           // move: {from, to, piece, ...}
-          return handleMove(move.from, move.to, move.piece);
+          return handleMove(move.from, move.to, move.piece ?? "p");
         }}
       />
       <div className="mt-4 text-base text-gray-700 min-h-[24px]">{status}</div>

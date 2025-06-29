@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { Chess } from 'chess.js';
 
@@ -135,9 +134,8 @@ export const useChessGame = (initialPgn?: string, initialFen?: string) => {
   const loadPgn = useCallback((pgn: string) => {
     try {
       const newChess = new Chess();
-      const success = newChess.loadPgn(pgn);
-      
-      if (success) {
+      newChess.loadPgn(pgn);
+      if (newChess.pgn()) {
         updateGameState(newChess);
         return true;
       } else {
@@ -153,9 +151,8 @@ export const useChessGame = (initialPgn?: string, initialFen?: string) => {
   const loadFen = useCallback((fen: string) => {
     try {
       const newChess = new Chess();
-      const success = newChess.load(fen);
-      
-      if (success) {
+      newChess.load(fen);
+      if (newChess.fen()) {
         updateGameState(newChess);
         return true;
       } else {
