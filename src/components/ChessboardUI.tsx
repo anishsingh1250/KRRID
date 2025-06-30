@@ -116,10 +116,10 @@ export default function ChessboardUI(props: ChessboardUIProps) {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <div className="bg-gradient-to-br from-[#f0d9b5] to-[#b58863] p-3 rounded-2xl shadow-2xl border-4 border-[#b58863]">
+      <div className="bg-gradient-to-br from-[#f0d9b5] to-[#b58863] p-3 rounded-2xl shadow-2xl border-4 border-[#b58863] w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl">
         <Chessboard
           position={props.fen}
-          boardWidth={props.boardWidth || 420}
+          boardWidth={props.boardWidth || 320}
           customLightSquareStyle={props.customLightSquareStyle}
           customDarkSquareStyle={props.customDarkSquareStyle}
           arePiecesDraggable={props.multiplayer ? isPlayersTurn({

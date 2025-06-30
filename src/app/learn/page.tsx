@@ -208,15 +208,15 @@ function AuthPageContent() {
         <form className="flex flex-col gap-4" onSubmit={handleAuth}>
           {mode === "signup" && (
             <div className="flex gap-4 w-full">
-              <input
-                type="text"
+            <input
+              type="text"
                 placeholder="First name*"
-                required
+              required
                 className="border border-gray-400 rounded-lg px-4 py-2 font-body focus:border-black outline-none bg-white text-black text-lg flex-1 min-w-0 placeholder-gray-400"
-                value={name}
-                onChange={e => setName(e.target.value)}
+              value={name}
+              onChange={e => setName(e.target.value)}
                 name="firstName"
-              />
+            />
               <input
                 type="text"
                 placeholder="Last name"
@@ -289,12 +289,12 @@ function AuthPageContent() {
           <div className="text-red-500 text-center text-base font-semibold">{message}</div>
         )}
         {mode === "login" && !showReset ? (
-          <button
+              <button
             className="text-black text-sm hover:underline font-semibold"
             onClick={() => setShowReset(true)}
-          >
+              >
             Forgot Password?
-          </button>
+              </button>
         ) : null}
         {showReset && mode === "login" && (
           <form onSubmit={handleReset} className="flex flex-col gap-4">
@@ -306,13 +306,13 @@ function AuthPageContent() {
               value={resetEmail}
               onChange={e => setResetEmail(e.target.value)}
             />
-            <button
+                      <button
               type="submit"
               className="bg-black text-white rounded-lg px-4 py-2 font-heading text-base transition-transform duration-200 hover:scale-105 hover:bg-gray-900 disabled:opacity-60 shadow"
               disabled={loading}
-            >
+                      >
               Reset Password
-            </button>
+                      </button>
             {resetMsg && (
               <div className="text-red-500 text-center text-base font-semibold">{resetMsg}</div>
             )}

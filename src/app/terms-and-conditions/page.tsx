@@ -13,7 +13,7 @@ export default function TermsAndConditions() {
           <li>Respectful behavior is expected from all students and parents during sessions.</li>
           <li>Krrid reserves the right to update these terms at any time. Continued use of our services implies acceptance of any changes.</li>
         </ul>
-        <p className="text-gray-600 text-sm text-center">For questions or clarifications, please contact us at <a href="mailto:officialkrrid@gmail.com" className="text-blue-600 underline">officialkrrid@gmail.com</a> or call +91 7309051044.</p>
+        <p className="text-gray-600 text-sm text-center">For questions or clarifications, please contact us at <a href="mailto:officialkrrid@gmail.com" className="text-blue-600 underline">officialkrrid@gmail.com</a> or call +91 72750 33235.</p>
       </section>
     </main>
   );

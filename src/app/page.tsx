@@ -132,29 +132,17 @@ export default function Home() {
 
 
       {/* Turn Pawns Into Queens Section */}
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1 }}
-        
-      >
       <section className="  py-10 px-4 flex flex-col items-center  overflow-x-clip min-h-[600px] md:min-h-[700px]">
         <div className="relative z-10 flex mt-[2em]  flex-col w-full max-w-5xl mx-auto items-center justify-center gap-5   ">
-        <h2 className="font-heading text-5xl md:text-[80px] font-Inter font-semibold text-center text-[#181f2b]  leading-[72px] tracking-[-4.28px]">
-              Turn Pawns Into 
-              <br />Queens With Us!
-            </h2>
-            <p className="   text-gray-600 bg-white font-Inter  text-center max-w-lg mb-0 text-lg">Chess sharpens critical thinking, improve focus, and problem solving skills for school and life!</p>
-</div>
-          
+          <h2 className="font-heading text-5xl md:text-[80px] font-Inter font-semibold text-center text-[#181f2b]  leading-[72px] tracking-[-4.28px]">
+            Turn Pawns Into 
+            <br />Queens With Us!
+          </h2>
+          <p className="   text-gray-600 bg-white font-Inter  text-center max-w-lg mb-0 text-lg">Chess sharpens critical thinking, improve focus, and problem solving skills for school and life!</p>
+        </div>
         <div className=" absolute    flex flex-row w-full max-w-5xl mt-[8em] py-0 items-center justify-center gap-0 ">
-        <Image src="/pawn.svg" alt="Pawn" width={250} height={510} className="hidden md:block h-[510px] w-[250px] object-contain" style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} />
-       
-        {/* <div className="flex w-full max-w-5xl mx-auto items-center justify-between gap-2 bg-blue-500"> */}
-          {/* <img src="/pawn.svg" alt="Pawn" className="hidden md:block h-[700px] w-[250px] object-contain ml-[-40px]" style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} /> */}
+          <Image src="/pawn.svg" alt="Pawn" width={250} height={510} className="hidden md:block h-[510px] w-[250px] object-contain" style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} />
           <div className="flex flex flex-col items-center justify-center px-10 ">
-            
             <div className="font-heading text-lg font-semibold text-center mb-3 text-[#181f2b]">At Krrid, we make learning fun with:</div>
             <div className="w-full max-w-xl flex flex-col gap-3 mb-2 items-center justify-center">
               <div className="grid grid-cols-4 gap-5 w-[42em] h-[2em]">
@@ -171,11 +159,8 @@ export default function Home() {
             <div className="font-Inter italic text-[#1D242B] text-center font-medium mt-8 text-base">With Krrid, kids don&apos;t just play, they master, grow, and excel!</div>
           </div>
           <Image src="/queen.svg" alt="Queen" width={250} height={460} className="hidden md:block h-[460px] w-[250px]  object-contain " style={{filter:'drop-shadow(0 8px 32px rgba(0,0,0,0.18))'}} />
-        {/* </div> */}
         </div>
-        
       </section>
-      </motion.section>
 
       {/* Benefits Section */}
       <motion.section

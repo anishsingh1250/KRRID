@@ -13,7 +13,7 @@ export default function PrivacyPolicy() {
           <li>You may request to update or delete your information at any time by contacting us.</li>
           <li>We may update this policy periodically. Continued use of our services implies acceptance of any changes.</li>
         </ul>
-        <p className="text-gray-600 text-sm text-center">For privacy concerns, please contact us at <a href="mailto:officialkrrid@gmail.com" className="text-blue-600 underline">officialkrrid@gmail.com</a> or call +91 7309051044.</p>
+        <p className="text-gray-600 text-sm text-center">For privacy concerns, please contact us at <a href="mailto:officialkrrid@gmail.com" className="text-blue-600 underline">officialkrrid@gmail.com</a> or call +91 72750 33235.</p>
       </section>
     </main>
   );

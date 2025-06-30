@@ -11,7 +11,7 @@ export default function RefundPolicy() {
           <li>Trial/demo classes are non-refundable.</li>
           <li>Refunds will be processed to the original payment method within 7-10 business days after approval.</li>
           <li>No refunds for classes already attended or partially used packages.</li>
-          <li>For any issues, please contact us at <a href="mailto:officialkrrid@gmail.com" className="text-blue-600 underline">officialkrrid@gmail.com</a> or call +91 7309051044.</li>
+          <li>For any issues, please contact us at <a href="mailto:officialkrrid@gmail.com" className="text-blue-600 underline">officialkrrid@gmail.com</a> or call +91 72750 33235.</li>
         </ul>
         <p className="text-gray-600 text-sm text-center">For more details, please refer to our Terms and Conditions or contact our support team.</p>
       </section>

@@ -118,7 +118,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
       {/* File labels on top */}
       <div className="flex items-center mb-2">
         <div className="w-6 md:w-8"></div>
-        <div className="grid grid-cols-8 gap-0 w-80 md:w-96 lg:w-[480px]">
+        <div className="grid grid-cols-8 gap-0 w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl">
           {files.map(file => (
             <div key={file} className="text-center text-xs md:text-sm font-semibold text-slate-700 py-1">
               {file}
@@ -138,7 +138,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
         </div>
         
         {/* Chess board grid */}
-        <div className="grid grid-cols-8 gap-0 border-4 border-slate-800 rounded-lg overflow-hidden shadow-xl w-80 md:w-96 lg:w-[480px]">
+        <div className="grid grid-cols-8 gap-0 border-4 border-slate-800 rounded-lg overflow-hidden shadow-xl w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl">
           {ranks.map(rank => 
             files.map(file => {
               const square = `${file}${rank}`;

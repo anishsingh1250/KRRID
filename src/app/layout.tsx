@@ -54,7 +54,7 @@ export default function RootLayout({
               <div className="flex flex-row gap-70 items-start md:items-end">
                 <span className="font-heading text-2xl font-Inter font-semibold text-white text-left leading-tight">Have Any Questions?<br />Please Don&apos;t Hesitate To <br/> Connect With Us -</span>
                 <div className="flex flex-col gap-2 items-start md:items-start">
-                  <span className="bg-gradient-to-r from-[#47D4EB]/100 to-[#000000]/100 text-white px-2 py-1 font-heading font-semibold text-base tracking-wide">+91 7309051044</span>
+                  <span className="bg-gradient-to-r from-[#47D4EB]/100 to-[#000000]/100 text-white px-2 py-1 font-heading font-semibold text-base tracking-wide">+91 72750 33235</span>
                   <span className="bg-gradient-to-r from-[#47D4EB]/100 to-[#000000]/100 text-white px-2 py-1 font-heading font-semibold text-base tracking-wide">officialkrrid@Gmail.Com</span>
                 </div>
               </div>
