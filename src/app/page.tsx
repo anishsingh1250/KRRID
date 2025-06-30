@@ -22,12 +22,6 @@ export default function Home() {
   const plansRef = useRef(null);
   const coursesRef = useRef(null);
   const contactRef = useRef(null);
-  const [isDemoOpen, setDemoOpen] = useState(false);
-  const [demoForm, setDemoForm] = useState({
-    firstName: '', lastName: '', email: '', phone: '', age: '', datetime: '', message: ''
-  });
-  const handleDemoChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setDemoForm({ ...demoForm, [e.target.name]: e.target.value });
-  const handleDemoSubmit = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); alert('Demo form submitted: ' + JSON.stringify(demoForm)); };
 
   // Move FAQ array and state here
   const faqs = [
@@ -98,112 +92,7 @@ export default function Home() {
 
   return (
     <div className="bg-white min-h-screen flex flex-col font-body">
-      {/* Navbar */}
-      <nav className="  relative flex items-center justify-between  px-6 py-1 border-b border-gray-100  top-0 z-50 bg-white/70 backdrop-blur-md">
-        <div className=" flex items-center gap-0 ml-[50px] h-[50px] w-[115px]   pt-[0px]">
-          <Image src="logo.svg" alt="Krrid Logo" width={155} height={50} /> 
-        </div>
-        <div className="nav-mid absolute left-1/2 -translate-x-1/2 ">
-        <ul className="hidden md:flex  flex items-center justify-center gap-8  text-black text-lg font-medium font-poppins">
-          <li className={`transition-colors duration-200 hover:text-white/90 cursor-pointer ${activeSection === "about" ? "text-primary font-bold" : "hover:text-primary"}`}>
-            <Link href="/about">About Us</Link>
-          </li>
-          <li className={`transition-colors duration-200 hover:text-white/90 cursor-pointer ${activeSection === "courses" ? "text-primary font-bold" : "hover:text-primary"}`}>
-            <Link href="/courses-curriculum">Courses & Curriculum</Link>
-          </li>
-          <li className={`transition-colors duration-200 hover:text-black/50 cursor-pointer ${activeSection === "contact" ? "text-primary font-bold" : "hover:text-primary"}`}>
-            <Link href="/contact">Contact Us</Link>
-          </li>
-        </ul>
-        </div>
-        <div className="flex gap-3 mr-[50px]">
-          <button
-            className="bg-black text-white rounded-lg px-5 py-2 font-heading text-base font-semibold transition-transform duration-200 hover:scale-105 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/60"
-            onClick={() => setDemoOpen(true)}
-            aria-haspopup="dialog"
-            aria-expanded={isDemoOpen}
-          >
-            Book a Demo
-          </button>
-          {/* Admin Panel button, only for admins */}
-          {user && user.email && ADMIN_EMAILS.includes(user.email) && (
-            <button
-              className="bg-gray-600 text-white rounded-lg px-5 py-2 font-medium font-poppins text-base  transition-transform duration-200 hover:scale-105 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400"
-              onClick={() => router.push('/admin')}
-            >
-              Admin Panel
-            </button>
-          )}
-        </div>
-      </nav>
-
-      {/* Demo Modal */}
-      {isDemoOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-900/80 via-blue-600/80 to-blue-400/80"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setDemoOpen(false)}
-        >
-          <div
-            className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative border-4 border-blue-200"
-            onClick={e => e.stopPropagation()}
-            tabIndex={-1}
-          >
-            <button
-              className="absolute top-2 right-2 text-blue-400 hover:text-blue-700 focus:outline-none text-3xl"
-              onClick={() => setDemoOpen(false)}
-              aria-label="Close demo dialog"
-            >
-              &times;
-            </button>
-            <h1 className="text-3xl font-heading font-bold mb-4 text-blue-800" tabIndex={0}>Book Your Free Demo</h1>
-            <p className="text-base text-gray-700 mb-4" tabIndex={0}>
-              Fill the form below to get the available slot.
-            </p>
-            <form className="grid gap-4 mb-2" onSubmit={handleDemoSubmit}>
-              <input className="rounded p-2 border border-blue-200" name="firstName" value={demoForm.firstName} onChange={handleDemoChange} placeholder="First name*" required />
-              <input className="rounded p-2 border border-blue-200" name="lastName" value={demoForm.lastName} onChange={handleDemoChange} placeholder="Last name" />
-              <input className="rounded p-2 border border-blue-200" name="email" value={demoForm.email} onChange={handleDemoChange} placeholder="Email*" type="email" required />
-              <input className="rounded p-2 border border-blue-200" name="phone" value={demoForm.phone} onChange={handleDemoChange} placeholder="Phone*" required />
-              <input className="rounded p-2 border border-blue-200" name="age" value={demoForm.age} onChange={handleDemoChange} placeholder="Age*" required />
-              <input className="rounded p-2 border border-blue-200" name="datetime" value={demoForm.datetime} onChange={handleDemoChange} placeholder="Date and time*" required />
-              <textarea className="rounded p-2 border border-blue-200" name="message" value={demoForm.message} onChange={handleDemoChange} placeholder="Message" rows={2} />
-              <button className="bg-gradient-to-r from-blue-500 to-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow hover:from-blue-600 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50">
-                Book Now
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
       {/* Hero Section */}
-      {/* <section id="hero" className="flex flex-col items-center text-center py-12 px-4 bg-gradient-to-b from-primary/10 to-white relative overflow-hidden">
-        <h1 className="krrid-heading text-5xl md:text-6xl font-bold leading-tight mb-4">
-          Learn through<br />the
-          <span className="bg-krrid-highlight"> Krrid</span> way!
-        </h1>
-        <p className="text-gray-500 max-w-xl mx-auto mb-6 text-lg">
-          Unlock genius through play. Krrid blends chess, challenges, and learning to transform curiosity into strategic mastery. Ready to make your move?
-        </p>
-        <div className="flex gap-4 justify-center mb-8">
-          <button
-            className="bg-black text-white rounded-lg px-8 py-2 font-heading text-lg font-semibold shadow-md transition-transform duration-200 hover:scale-105 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/60 ripple"
-            onClick={e => { e.currentTarget.classList.add('ripple-animate'); setTimeout(() => e.currentTarget.classList.remove('ripple-animate'), 400); router.push("/chess"); }}
-          >
-            Play
-          </button>
-          <button
-            className="bg-gray-100 text-black rounded-lg px-8 py-2 font-heading text-lg font-semibold border border-gray-300 shadow-md transition-transform duration-200 hover:scale-105 hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/60 ripple"
-            onClick={e => { e.currentTarget.classList.add('ripple-animate'); setTimeout(() => e.currentTarget.classList.remove('ripple-animate'), 400); router.push("/learn"); }}
-          >
-            Learn
-          </button>
-        </div>
-        <div className="w-full flex justify-center">
-          <Image src="/chessboard.svg" alt="Chessboard" width={700} height={300} className="rounded-xl shadow-card drop-shadow-[0_0_40px_rgba(37,198,245,0.25)]" />
-        </div>
-      </section> */}
       <section id="hero" className="relative flex flex-col items-center text-center py-8 px-4   w-full h-[700px]">
 
   {/* Background Image */}
@@ -292,42 +181,64 @@ export default function Home() {
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
-        // viewport={{ once: true }}
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 1 }}
-        className="py-6 px-4  flex flex-col items-center"
+        className="py-6 px-4 flex flex-col items-center"
       >
-        <h2 className="font-Inter text-4xl md:text-[80px]  font-semibold text-black text-center leading-[77px] tracking-[-2.28px]  mb-10">Benefits Of Chess <br/> For Kids</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full  max-w-6xl mt-10 mb-6">
-          <div className="bg-gradient-to-t from-[#47D4EB]/20 to-[#ffffff]/20 border border-[3px] border-gray-300 rounded-4xl shadow-card p-5 flex flex-col items-start">
-            <h3 className="font-Inter font-semibold text-2xl text-black mb-2">Empowering Strategic Minds:</h3>
-            <p className="text-[#55525B] font-Inter font-regular text-start text-base mb-4">Cultivate planning, foresight, and critical decision-making skills that lay the foundation for academic and personal success.</p>
-            <Image src="/boost.svg" alt="Book" width={396} height={200} />
+        <h2 className="font-Inter text-4xl md:text-[64px] font-semibold text-black text-center leading-[77px] tracking-[-2.28px] mb-10">Benefits Of Chess <br/> For Kids</h2>
+        <div
+          className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 grid-rows-3 gap-6"
+          style={{ gridTemplateRows: 'repeat(3, minmax(180px, auto))', gridTemplateColumns: 'repeat(3, 1fr)' }}
+        >
+          {/* Top left: Interactive & Engaging Experience */}
+          <div className="bg-white border border-black rounded-3xl p-6 flex flex-col justify-between md:col-span-2 md:row-span-1 md:flex-row md:items-center" style={{ gridColumn: '1/3', gridRow: '1/2' }}>
+            <div className="flex-1">
+              <h3 className="font-Inter font-bold text-xl md:text-2xl text-black mb-2">Interactive & Engaging Experience:</h3>
+              <p className="text-[#222] font-Inter text-base mb-2">With Krrid's dynamic platform, learning chess transforms into an immersive journey where every match sparks curiosity, growth, and the joy of discovery.</p>
+            </div>
+            <div className="flex-shrink-0 mt-4 md:mt-0 md:ml-6">
+              <Image src="/interactive.svg" alt="Kids learning chess" width={180} height={120} className="rounded-2xl object-cover" />
+            </div>
           </div>
-          <div className="bg-gradient-to-b from-[#000000]/90 to-[#55525B]/100 border border-[3px] border-black-300 rounded-4xl shadow-card p-0 flex flex-col items-center">
-            <h3 className="font-Inter pl-6 pr-6 pt-6 pb-0 font-semibold text-2xl text-white mb-2">Enhancing Social Interaction:</h3>
-            <p className="text-[#E1DFE8] pl-6 pr-6 pt-0 pb-0 font-Inter font-regular text-start text-base mb-4">Promote respectful competition, sportsmanship, and teamwork through interactive, fun chess sessions that connect young minds.</p>
-            <Image src="/boost.svg" alt="Social" width={350} height={200} />
+          {/* Top right: Fostering Creativity & Innovation */}
+          <div className="bg-white border border-black rounded-3xl p-6 flex flex-col justify-between" style={{ gridColumn: '3/4', gridRow: '1/2' }}>
+            <h3 className="font-Inter font-bold text-xl md:text-2xl text-black mb-2">Fostering Creativity & Innovation:</h3>
+            <p className="text-[#222] font-Inter text-base">Encourage kids to explore diverse strategies, turning challenges into opportunities and everyday moves into bold breakthroughs.</p>
           </div>
-          <div className="bg-gradient-to-t from-[#47D4EB]/20 to-[#ffffff]/20 border border-[3px] border-gray-300 rounded-4xl shadow-card p-0 flex flex-col items-start">
-            <h3 className="font-Inter font-semibold text-2xl text-black mb-2 pl-6 pt-6 pr-6 pb-0">Boosting Cognitive Abilities:</h3>
-            <p className="text-[#55525B] font-Inter font-regular text-start text-base leading-[24px] mb-4 pl-6 pr-6 pb-0">Enhance memory, concentration, and problem-solving skill , each move sharpens the mind for smarter learning.</p>
-            <Image src="/boost.svg" alt="Cognitive" width={450} height={200}  />
+          {/* Middle left: Empowering Strategic Minds */}
+          <div className="bg-white border border-black rounded-3xl p-6 flex flex-col justify-between" style={{ gridColumn: '1/2', gridRow: '2/3' }}>
+            <h3 className="font-Inter font-bold text-xl md:text-2xl text-black mb-2">Empowering Strategic Minds:</h3>
+            <p className="text-[#222] font-Inter text-base mb-2">Cultivate planning, foresight, and critical decision-making skills that lay the foundation for academic and personal success.</p>
+            <div className="flex-shrink-0 mt-2">
+              <Image src="/empowering.svg" alt="Strategic mind" width={120} height={80} className="object-contain" />
+            </div>
           </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
-          <div className="bg-gradient-to-t from-[#47D4EB]/20 to-[#ffffff]/20 border border-[3px] border-gray-300 rounded-4xl shadow-card p-6 flex flex-col items-start">
-            <h3 className="font-Inter font-semibold text-2xl text-black mb-2">Interactive & Engaging Experience:</h3>
-            <p className="text-[#55525B] font-Inter font-regular text-start text-basemb-4">With Krrid&apos;s dynamic platform, learning chess transforms into an immersive journey where every match sparks curiosity, growth, and the joy of discovery.</p>
-            <Image src="/boost.svg" alt="Engage" width={480} height={200} />
+          {/* Middle right: Boosting Cognitive Abilities */}
+          <div className="bg-white border border-black rounded-3xl p-6 flex flex-row justify-between items-center md:col-span-2" style={{ gridColumn: '2/4', gridRow: '2/3' }}>
+            <div className="flex-1">
+              <h3 className="font-Inter font-bold text-xl md:text-2xl text-black mb-2">Boosting Cognitive Abilities:</h3>
+              <p className="text-[#222] font-Inter text-base">Enhance memory, concentration, and problem-solving skill , each move sharpens the mind for smarter learning.</p>
+            </div>
+            <div className="flex-shrink-0 ml-6">
+              <Image src="/ability.svg" alt="Brain with ladder" width={120} height={80} className="object-contain" />
+            </div>
           </div>
-          <div className="bg-gradient-to-t from-[#47D4EB]/20 to-[#ffffff]/20 border border-[3px] border-gray-300 rounded-4xl p-6 flex flex-col items-start">
-            <h3 className="font-Inter font-semibold text-2xl text-black mb-2 ">Fostering Creativity & Innovation:</h3>
-            <p className="text-[#55525B] font-Inter font-regular text-start text-base mb-4">Encourage kids to explore diverse strategies, turning challenges into opportunities and everyday moves into bold breakthroughs.</p>
-            <Image src="/innovativatio.svg" alt="Creative" width={400} height={150} />
+          {/* Bottom left: (empty for spacing) */}
+          <div className="hidden md:block" style={{ gridColumn: '1/2', gridRow: '3/4' }}></div>
+          {/* Bottom: Enhancing Social Interaction */}
+          <div className="bg-white border border-black rounded-3xl p-6 flex flex-row justify-between items-center md:col-span-2" style={{ gridColumn: '2/4', gridRow: '3/4' }}>
+            <div className="flex-1">
+              <h3 className="font-Inter font-bold text-xl md:text-2xl text-black mb-2">Enhancing Social Interaction:</h3>
+              <p className="text-[#222] font-Inter text-base">Promote respectful competition, sportsmanship, and teamwork through interactive, fun chess sessions that connect young minds.</p>
+            </div>
+            <div className="flex-shrink-0 ml-6">
+              <Image src="/social.svg" alt="Kids socializing" width={140} height={100} className="rounded-2xl object-cover" />
+            </div>
           </div>
         </div>
       </motion.section>
+
+      
 
       {/* Testimonials Section */}
       <motion.section
@@ -403,52 +314,6 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
-
-      {/* Footer */}
-      <footer className="bg-black text-white pt-12 pb-0 px-0 rounded-t-[8rem] mt-1 w-full">
-        <div className="flex  flex-col  md:flex-row justify-between items-center max-w-7xl mx-auto gap-5 px-1">
-          <div className="flex flex-col gap-2 ml-0 items-start mt-2">
-            <Image src="/logo.svg" alt="Krrid Logo" width={80} height={40} />
-            <span className="text-lg leading-tight mt-4">Shiddhart Vihar, Gaur City 2,<br />Ghaziabad, Uttar Pradesh<br />201009</span>
-            {/* <div className="flex gap-3 mt-2">
-              <Image src="/ig.svg" alt="Instagram" width={20} height={20} />
-              <Image src="/fb.svg" alt="Facebook" width={20} height={20} />
-              <Image src="/x.svg" alt="X" width={20} height={20} />
-              <Image src="/yt.svg" alt="YouTube" width={20} height={20} />
-            </div> */}
-            <div className="flex space-x-4 mt-2">
-      <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
-        <FaFacebook className="w-6 h-6 text-blue-600" />
-      </a>
-      <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
-        <FaInstagram className="w-6 h-6 text-pink-500" />
-      </a>
-      <a href="https://youtube.com" target="_blank" rel="noopener noreferrer">
-        <FaYoutube className="w-6 h-6 text-blue-400" />
-      </a>
-      <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
-        <FaLinkedin className="w-6 h-6 text-blue-700" />
-      </a>
-    </div>
-          </div>
-          <div className="flex  flex-row gap-70 items-start md:items-end">
-            <span className="font-heading text-2xl font-Inter font-semibold text-white text-left  leading-tight">Have Any Questions?<br />Please Don&apos;t Hesitate To <br/> Connect With Us -</span>
-           <div className="flex flex-col gap-2 items-start md:items-start">
-           <span className="bg-gradient-to-r from-[#47D4EB]/100 to-[#000000]/100 text-white px-2 py-1  font-heading font-semibold text-base tracking-wide">+91 7309051044</span>
-            <span className="bg-gradient-to-r from-[#47D4EB]/100 to-[#000000]/100 text-white px-2 py-1  font-heading font-semibold text-base tracking-wide">officialkrrid@Gmail.Com</span>
-
-            </div> 
-          </div>
-        </div>
-        <div className="bg-[#47D4EB] w-full mt-8 py-2 px-0 flex flex-col md:flex-row justify-between items-center max-w-full text-xs text-black font-semibold tracking-wide">
-          <span className="ml-[8rem] font-Inter font-semibold ">Copyright © 2025 Krrid</span>
-          <div className="flex gap-15 mr-[5rem] mt-2 md:mt-0">
-            <span className="hover:underline cursor-pointer">Refund Policy</span>
-            <span className="hover:underline cursor-pointer">Terms and Conditions</span>
-            <span className="hover:underline cursor-pointer">Privacy Policy</span>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
